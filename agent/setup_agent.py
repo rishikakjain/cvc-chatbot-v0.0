@@ -421,49 +421,59 @@ def write_env_agent(agent_id: str, alias_id: str, lambda_arn: str) -> None:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 
+def add_bedrock_runtime_permission(iam, account_id: str) -> None:
+    """Allow Lambda to invoke Claude via Bedrock Runtime (Converse API)."""
+    iam.put_role_policy(
+        RoleName=IAM_ROLE_NAME,
+        PolicyName="cvc-bedrock-runtime-invoke",
+        PolicyDocument=json.dumps({
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream",
+                ],
+                "Resource": f"arn:aws:bedrock:{AWS_REGION}::foundation-model/*",
+            }],
+        }),
+    )
+    print("  Added Bedrock Runtime invoke permission to role")
+
+
+def write_env_agent_simple(lambda_arn: str) -> None:
+    env_path = PROJECT_ROOT / ".env.agent"
+    env_path.write_text(
+        f"LAMBDA_ARN={lambda_arn}\n"
+        f"AWS_REGION={AWS_REGION}\n"
+    )
+    print(f"\n  Wrote config to {env_path.name}")
+
+
 def main() -> None:
     session = boto3.Session(region_name=AWS_REGION)
     sts = session.client("sts")
     iam = session.client("iam")
     lambda_client = session.client("lambda")
-    bedrock_agent = session.client("bedrock-agent")
 
     account_id = sts.get_caller_identity()["Account"]
     print(f"\nAWS account: {account_id} | region: {AWS_REGION}\n")
 
     print("1. IAM role")
     role_arn = get_or_create_iam_role(iam, account_id)
+    add_bedrock_runtime_permission(iam, account_id)
 
-    print("\n2. Lambda function")
+    print("\n2. Lambda function (tools)")
     lambda_arn = deploy_lambda(lambda_client, role_arn)
-    add_bedrock_permission(lambda_client, lambda_arn, account_id)
 
-    print("\n3. Bedrock Agent")
-    agent_id = get_or_create_agent(bedrock_agent, role_arn)
-
-    print("\n4. Action group")
-    setup_action_group(bedrock_agent, agent_id, lambda_arn)
-
-    print("\n5. Prepare agent")
-    prepare_agent(bedrock_agent, agent_id)
-
-    print("\n6. Agent alias")
-    alias_id = create_agent_alias(bedrock_agent, agent_id)
-
-    write_env_agent(agent_id, alias_id, lambda_arn)
+    write_env_agent_simple(lambda_arn)
 
     print(f"""
 Setup complete!
 
-  Agent ID:   {agent_id}
-  Alias ID:   {alias_id}
-  Lambda ARN: {lambda_arn}
+  Tools Lambda: {lambda_arn}
 
-Test in the Bedrock console:
-  Agents → {AGENT_NAME} → Test (top-right)
-
-Or test via CLI:
-  python agent/test_agent.py
+Next: run  python3 api/setup_api.py
 """)
 
 
