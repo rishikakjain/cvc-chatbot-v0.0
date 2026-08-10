@@ -32,6 +32,13 @@ function CourseInfoFooter() {
  * Convert a course object from the API response (summarize_course shape) to
  * the CourseCard component's expected shape.
  */
+function fmtDate(iso) {
+  if (!iso) return ''
+  // Parse as local date to avoid UTC-offset shifts
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 function apiCourseToCourseCard(course, index) {
   let seatsAvailable = null
   let seatsTotal = null
@@ -49,8 +56,8 @@ function apiCourseToCourseCard(course, index) {
     units: typeof course.units === 'number' ? course.units : parseFloat(course.units) || null,
     college: course.teachingCollege || '',
     delivery: course.deliveryMethod || '',
-    startDate: course.startDate || '',
-    endDate: course.endDate || '',
+    startDate: fmtDate(course.startDate),
+    endDate: fmtDate(course.endDate),
     professor: course.professors || '',
     note: course.courseNotes || '',
     ge: Array.isArray(course.geChips) ? course.geChips : [],
@@ -64,11 +71,25 @@ function BotContent({ content, courses, onSaveCourse, savedCourses, onSearchGE }
   // trying to parse markdown. Fall back to parseCourses for older messages
   // that have no courses prop (e.g., session history loaded from DynamoDB).
   if (courses && courses.length > 0) {
-    // Strip bullet lines and markdown table rows — the model sometimes leaks
-    // course details even when told not to. Keep only plain prose lines.
+    // Keep only the intro sentence and numbered follow-up options.
+    // Everything else (course detail lines, bold headers, tables, bullets)
+    // is already shown on the cards — strip it so it doesn't double-render.
     const prose = content
       .split('\n')
-      .filter(line => !/^\s*[-*•]/.test(line) && !/^\s*\|/.test(line))
+      .filter(line => {
+        const t = line.trim()
+        if (!t) return false
+        // Keep numbered follow-up options (1. ... 2. ... etc.)
+        if (/^\d+\./.test(t)) return true
+        // Drop table rows, bullet lists, bold course headers, and lines
+        // that contain course-detail patterns (|, units, seats, hrs/wk)
+        if (/^\s*[-*•]/.test(t)) return false
+        if (/^\s*\|/.test(t)) return false
+        if (/\|\s*(professor|start|seats|textbook|workload)/i.test(t)) return false
+        if (/\d+\s*(unit|hrs\/wk|weeks|months)/i.test(t)) return false
+        if (/\*\*[A-Z ]+\([A-Z]+ \d+\)/.test(t)) return false  // **COURSE NAME (CODE)**
+        return true
+      })
       .join('\n')
       .trim()
 

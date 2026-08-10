@@ -94,7 +94,7 @@ def filter_courses(
 
     for course in courses:
         # Exclude student's home college
-        if exclude_college and course.get("teachingCollege", "").lower() == exclude_college.lower():
+        if exclude_college and exclude_college.lower() in course.get("teachingCollege", "").lower():
             continue
 
         # Delivery method filter
@@ -141,6 +141,16 @@ def filter_courses(
     return results[:top_n]
 
 
+def _normalize_name(name: str | None) -> str | None:
+    """Title-case a course name if it is all-uppercase, leave mixed-case alone."""
+    if not name:
+        return name
+    stripped = name.strip()
+    if stripped == stripped.upper():
+        return stripped.title()
+    return stripped
+
+
 def summarize_course(course: dict) -> dict:
     """
     Return a chatbot-friendly summary of a course record.
@@ -173,7 +183,7 @@ def summarize_course(course: dict) -> dict:
 
     return {
         "courseCode": course.get("courseCode"),
-        "courseName": course.get("courseName"),
+        "courseName": _normalize_name(course.get("courseName")),
         "teachingCollege": course.get("teachingCollege"),
         "units": course.get("units"),
         "deliveryMethod": course.get("deliveryMethod"),

@@ -519,7 +519,8 @@ export default function App() {
 
   async function handleSearchGE(geTag) {
     if (loading) return
-    const text = `Show me all available courses that satisfy ${geTag}`
+    const exclusion = homeCollege ? `, excluding ${homeCollege}` : ''
+    const text = `Show me all available courses that satisfy ${geTag}${exclusion}`
     setMessages(prev => [...prev, { role: 'user', content: text }])
     setLoading(true)
     try {

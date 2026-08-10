@@ -181,6 +181,40 @@ def _run_tool(name: str, tool_input: dict) -> str:
 
 # ── Converse API loop ─────────────────────────────────────────────────────────
 
+def _strip_course_prose(text: str) -> str:
+    """
+    When filter_courses returned results, keep only:
+    - The first plain-text intro sentence
+    - Numbered follow-up options (1. ... 2. ...)
+    Everything else is already rendered on the course cards.
+    """
+    import re
+    # Follow-up options always start with an action verb — course listings never do
+    followup_action = re.compile(
+        r'^\d+\.\s+\*{0,2}(search|show|filter|find|explain|tell|compare|narrow|look|get|see|ask|check|help|what|how|which|can you|display)',
+        re.I
+    )
+    intro = None
+    numbered = []
+    for line in text.splitlines():
+        t = line.strip()
+        if not t:
+            continue
+        if re.match(r'^\d+\.', t):
+            if followup_action.match(t):
+                numbered.append(line)
+        elif intro is None and not t.startswith('|') and not re.match(r'^[-*•#]', t) and not re.match(r'^---', t):
+            # Strip trailing colon/intro markers like "Here's what's available:"
+            first_sentence = re.split(r':\s*$', t)[0]
+            intro = first_sentence
+    parts = []
+    if intro:
+        parts.append(intro.rstrip('.') + '.')
+    if numbered:
+        parts.extend(numbered)
+    return '\n'.join(parts).strip()
+
+
 def converse(messages: list[dict]) -> tuple[str, list[dict]]:
     """
     Run the Bedrock Converse API tool-use loop.
@@ -208,10 +242,12 @@ def converse(messages: list[dict]) -> tuple[str, list[dict]]:
         current_messages.append(output_message)
 
         if stop_reason == "end_turn":
-            # Extract text from the response
             for block in output_message.get("content", []):
                 if "text" in block:
-                    return block["text"], list(courses_seen.values())
+                    text = block["text"]
+                    if courses_seen:
+                        text = _strip_course_prose(text)
+                    return text, list(courses_seen.values())
             return "", list(courses_seen.values())
 
         if stop_reason == "tool_use":
@@ -278,6 +314,45 @@ def save_session(session: dict) -> None:
         pass
 
 
+def _known_colleges() -> list[str]:
+    """Return all unique teaching college names from the course dataset."""
+    try:
+        data_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "data", "courses.json"
+        )
+        with open(data_path) as f:
+            courses = json.load(f)
+        return list({c["teachingCollege"] for c in courses if c.get("teachingCollege")})
+    except Exception:
+        return []
+
+
+def _resolve_college(raw: str) -> str:
+    """
+    Match a user-typed college name (possibly abbreviated) to the full canonical
+    name from the dataset. Falls back to title-cased raw input if no match.
+    """
+    if not raw:
+        return raw
+    known = _known_colleges()
+    raw_lower = raw.strip().lower()
+    # Exact match (case-insensitive)
+    for college in known:
+        if college.lower() == raw_lower:
+            return college
+    # Substring: user typed a word that appears in a known college name
+    matches = [c for c in known if raw_lower in c.lower()]
+    if len(matches) == 1:
+        return matches[0]
+    # Known college name is a substring of what the user typed (e.g. "cuesta college ca")
+    matches = [c for c in known if c.lower() in raw_lower]
+    if len(matches) == 1:
+        return matches[0]
+    # No match — return title-cased input as-is
+    return raw.strip().title()
+
+
 def extract_home_college(message: str, current: str | None) -> str | None:
     if current:
         return current
@@ -291,7 +366,7 @@ def extract_home_college(message: str, current: str | None) -> str | None:
             m = re.split(r',|\band\b|\bbut\b|\bso\b|[!?;]', rest, maxsplit=1)
             college = m[0].strip().rstrip('.')
             if college:
-                return college.title()
+                return _resolve_college(college)
     return None
 
 

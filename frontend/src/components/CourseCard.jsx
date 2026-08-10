@@ -31,7 +31,7 @@ function GEChip({ tag, onSearch }) {
     <button
       className={`cc-chip cc-chip--btn ${cls}`}
       onClick={() => onSearch && onSearch(tag)}
-      title={`Find all courses satisfying ${tag}`}
+      title={`Find equivalent courses at other colleges satisfying ${tag}`}
     >
       {tag}
       <svg className="cc-chip__search" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
