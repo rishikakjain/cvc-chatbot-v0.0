@@ -70,11 +70,15 @@ TOOL_CONFIG = {
         {
             "toolSpec": {
                 "name": "filter_courses",
-                "description": "Search for available CVC online courses by GE area, delivery method, college, and start date.",
+                "description": "Search for available CVC online courses by subject, GE area, delivery method, college, and start date. Use subject_keyword when the student asks by subject name (e.g. 'math', 'biology'). Use ge_areas when they ask by GE requirement. Use both together for best results.",
                 "inputSchema": {
                     "json": {
                         "type": "object",
                         "properties": {
+                            "subject_keyword": {
+                                "type": "string",
+                                "description": "Free-text keyword to match against course name (case-insensitive). Use when student asks for a subject like 'math', 'algebra', 'statistics', 'biology'. Can be combined with ge_areas.",
+                            },
                             "ge_areas": {
                                 "type": "string",
                                 "description": "Comma-separated GE area codes (e.g. 'B2,5B'). Omit for no GE filter.",
@@ -157,6 +161,7 @@ def _run_tool(name: str, tool_input: dict) -> str:
         top_n = int(tool_input.get("top_n", 5))
         courses = filter_courses(
             ge_areas=ge_areas,
+            subject_keyword=tool_input.get("subject_keyword"),
             delivery_method=tool_input.get("delivery_method"),
             exclude_college=tool_input.get("exclude_college"),
             start_after=tool_input.get("start_after"),

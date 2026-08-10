@@ -119,6 +119,67 @@ _FAQ: list[dict] = [
             "Units from CVC courses transfer back to your home college and count toward your unit total."
         ),
     },
+    {
+        "triggers": ["eligible", "eligibility", "qualify", "can i use cvc", "who can enroll", "am i eligible", "requirements to enroll", "do i qualify", "can i sign up", "eligible for cvc"],
+        "answer": (
+            "To enroll through CVC Exchange you must: (1) Currently be enrolled at a California community college. "
+            "(2) Be at least 18 years old. (3) Have a GPA of 2.0 or higher (or no GPA established yet — first term is fine). "
+            "(4) Have no outstanding fees at your home college. (5) Have an in-state address on file. "
+            "You're limited to 2 CVC courses per term (winter + spring count as one term). "
+            "Note: dual-enrolled high school students and international/F-1 visa students are NOT eligible for CVC Exchange — "
+            "they must apply directly via CCCApply. If a course has prerequisites, you'll need to upload a transcript "
+            "and allow up to 3 business days for review (your spot is not reserved during this time). "
+            "Questions? Email support@cvc.edu."
+        ),
+    },
+    {
+        "triggers": ["transcript", "transcripts", "my transcript", "where is my transcript", "get transcript", "grades transfer", "how do grades work", "how does transcript work", "send transcript", "teaching college transcript"],
+        "answer": (
+            "After the semester ends, the teaching college automatically sends an electronic transcript to your home college — "
+            "this typically takes up to 3 weeks. If you need it sooner, request it directly from the teaching college. "
+            "If no transcript arrives after 3 weeks, contact support@cvc.edu. "
+            "CVC Exchange courses may appear as transfer credit on your home transcript; a counselor evaluation may be required. "
+            "If you're transferring to a 4-year university, you must request transcripts directly from the teaching college — "
+            "your Teaching College ID (found in your CVC Exchange profile at search.cvc.edu) is required and fees may apply."
+        ),
+    },
+    {
+        "triggers": ["financial aid", "fafsa", "pell grant", "aid", "promise grant", "ccpg", "ab540", "dream act", "veterans benefits", "gi bill", "zero textbook", "ztc", "textbook cost"],
+        "answer": (
+            "Financial aid can apply to CVC courses — here's how: "
+            "After enrolling at cvc.edu, select 'Request to use Federal Financial Aid' on the confirmation page. "
+            "Your home college evaluates eligibility; you need at least 6 units at your home college. "
+            "Requesting aid does NOT guarantee it — you're still responsible for payment during review. "
+            "California Promise Grant (CCPG): may cover CVC courses; re-apply through the teaching college via "
+            "Exchange Profile > Class Schedule > Pay Now. "
+            "AB540/Dream Act students: establish AB540 status at your home college first, then apply to the teaching college via CADAA. "
+            "Veterans: your home college sends a Parent School Authorization Letter to the teaching college. "
+            "Zero Textbook Cost (ZTC) courses have no required textbook purchases — I can note which courses carry this designation."
+        ),
+    },
+    {
+        "triggers": ["cybersecurity", "cyber security", "cyber program", "ict", "comptia", "cisco", "security certificate", "cybersecurity program", "network+", "security+"],
+        "answer": (
+            "CVC offers a Cybersecurity Certificate Program: 25 units across 8 courses, delivered over 35 weeks "
+            "(8-week sequences with 1-week breaks), and students progress as a cohort. "
+            "Cost: $46/unit × 25 units; Zero Textbook Cost and financial aid are available. "
+            "Three home colleges participate: Cosumnes River College, Fresno City College, and Los Angeles Pierce College — "
+            "you must register, get financial aid, and meet with a counselor at one of these. "
+            "The certificate is stackable toward advanced ICT credentials and can transfer toward a bachelor's program. "
+            "9 industry exams are offered (optional but encouraged): CompTIA A+, Network+, Security+, IT Fundamentals; "
+            "Cisco CCENT, CCNA variants. Want help finding a cybersecurity course to get started?"
+        ),
+    },
+    {
+        "triggers": ["ineligible", "why can't i enroll", "why cant i enroll", "blocked from enrolling", "account hold", "hold on account", "inactive", "non-credit", "not eligible"],
+        "answer": (
+            "Common reasons CVC enrollment is blocked: account hold or outstanding fees at your home college, "
+            "inactive status at your home college, no CCCApply application on file, non-credit student status, "
+            "GPA below 2.0, under 18 years old, or the system can't locate your CCCID or Canvas account. "
+            "Dual-enrolled high school students and F-1 visa holders are ineligible for the Exchange entirely. "
+            "If none of these apply and you're still blocked, email support@cvc.edu."
+        ),
+    },
 ]
 
 

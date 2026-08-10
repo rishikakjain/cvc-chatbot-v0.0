@@ -113,6 +113,12 @@ def parse_row(headers: list[str], row) -> dict | None:
                 course[json_key] = int(val) if val is not None else None
             except (ValueError, TypeError):
                 course[json_key] = None
+        elif json_key == "courseCode":
+            code = str(val).strip() if val is not None else None
+            # Normalise "MATH232" → "MATH 232", "BIO101A" → "BIO 101A"
+            if code:
+                code = re.sub(r'^([A-Za-z]+)(\d)', r'\1 \2', code)
+            course[json_key] = code
         elif json_key == "crn":
             # CRN is a UUID string in this dataset
             course[json_key] = str(val).strip() if val is not None else None

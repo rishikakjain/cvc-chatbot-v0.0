@@ -35,6 +35,7 @@ def load_courses(source_path: str | Path | None = None) -> list[dict]:
 
 def filter_courses(
     ge_areas: list[str] | None = None,
+    subject_keyword: str | None = None,
     delivery_method: str | None = None,
     exclude_college: str | None = None,
     start_after: str | None = None,
@@ -48,10 +49,11 @@ def filter_courses(
     Args:
         ge_areas:        List of GE area codes to match (any of; e.g. ["B1","B3"]).
                          Checks csuBreadth, igetc, and calGetc fields.
-                         None = no GE filter (returns all subjects).
+                         None = no GE filter.
+        subject_keyword: Free-text keyword matched against courseName (case-insensitive).
+                         Use when student asks by subject name e.g. "math", "biology", "history".
         delivery_method: "async" | "sync" | None (no filter).
         exclude_college: Exact teaching college name to exclude (student's home college).
-                         v0.1 hook: this param will also trigger ASSIST crosswalk lookup.
         start_after:     ISO date string "YYYY-MM-DD"; exclude courses starting before this.
         has_seats:       If True, only return courses with seatsAvailable > 0.
         top_n:           Max results to return.
@@ -70,6 +72,8 @@ def filter_courses(
             delivery_filter = "online - asynchronous"
         elif "sync" in dl:
             delivery_filter = "online - synchronous"
+
+    keyword = subject_keyword.lower().strip() if subject_keyword else None
 
     for course in courses:
         # Exclude student's home college
@@ -104,6 +108,12 @@ def filter_courses(
             if not any(code.upper() in course_areas_upper for code in ge_areas):
                 continue
 
+        # Subject keyword filter — matches against course name
+        if keyword:
+            name = (course.get("courseName") or "").lower()
+            if keyword not in name:
+                continue
+
         results.append(course)
 
     # Sort by seats available descending, then by start date ascending
@@ -125,6 +135,25 @@ def summarize_course(course: dict) -> dict:
         if codes:
             ge_tags.append(f"{label}: {', '.join(codes)}")
 
+    available = course.get("seatsAvailable")
+    total = course.get("seatCount")
+    if available is not None and total:
+        seats_str = f"{available} out of {total}"
+    elif available is not None:
+        seats_str = str(available)
+    else:
+        seats_str = None
+
+    # Build flat GE tag list with framework prefix so the frontend can colour-code them
+    # Format: ["CSU B4", "IGETC 2A", "Cal-GETC 2"]
+    ge_chips = []
+    for code in (course.get("csuBreadth") or []):
+        ge_chips.append(f"CSU {code}")
+    for code in (course.get("igetc") or []):
+        ge_chips.append(f"IGETC {code}")
+    for code in (course.get("calGetc") or []):
+        ge_chips.append(f"Cal-GETC {code}")
+
     return {
         "courseCode": course.get("courseCode"),
         "courseName": course.get("courseName"),
@@ -133,10 +162,9 @@ def summarize_course(course: dict) -> dict:
         "deliveryMethod": course.get("deliveryMethod"),
         "startDate": course.get("startDate"),
         "endDate": course.get("endDate"),
-        "seatsAvailable": course.get("seatsAvailable"),
-        "seatCount": course.get("seatCount"),
+        "availableSeats": seats_str,
         "professors": course.get("professors"),
         "badges": course.get("badges") or [],
-        "geTags": ge_tags,
+        "geChips": ge_chips,
         "courseNotes": course.get("courseNotes"),
     }

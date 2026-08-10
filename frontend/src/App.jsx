@@ -102,30 +102,310 @@ function CVCLandingPage() {
   )
 }
 
+// Branching onboarding tree.
+// Each node: { id, question, options: [{ label, value, next }] }
+// next: node id string, 'done', or an 'exit_*' key handled in handleOnboardingAnswer
+const ONBOARDING = {
+  student_type: {
+    id: 'student_type',
+    question: "Hi! To find the right courses for you — what best describes you?",
+    options: [
+      { label: "CC student looking for courses at another CC", value: 'cc', next: 'visa_status' },
+      { label: "UC or CSU student taking CC courses for credit", value: 'ucscu', next: 'visa_status_ucscu' },
+      { label: "Just exploring", value: 'other', next: 'exit_other' },
+    ],
+  },
+  visa_status: {
+    id: 'visa_status',
+    question: "Are you on an F-1 international student visa?",
+    options: [
+      { label: "No — I'm domestic", value: 'domestic', next: 'age_check' },
+      { label: "Yes — F-1 visa", value: 'f1', next: 'exit_f1' },
+    ],
+  },
+  visa_status_ucscu: {
+    id: 'visa_status_ucscu',
+    question: "Are you on an F-1 international student visa?",
+    options: [
+      { label: "No — I'm domestic", value: 'domestic', next: 'ucscu_type' },
+      { label: "Yes — F-1 visa", value: 'f1', next: 'exit_f1' },
+    ],
+  },
+  age_check: {
+    id: 'age_check',
+    question: "CVC requires students to be at least 18 years old. Are you 18 or older?",
+    options: [
+      { label: "Yes — I'm 18 or older", value: 'yes', next: 'gpa_check' },
+      { label: "No — I'm under 18", value: 'no', next: 'exit_underage' },
+    ],
+  },
+  gpa_check: {
+    id: 'gpa_check',
+    question: "Do you have a GPA of 2.0 or higher at your home college? (If this is your first term or you haven't completed a course yet, that's fine too.)",
+    options: [
+      { label: "Yes — 2.0 GPA or higher", value: 'yes', next: 'transfer_goal' },
+      { label: "It's my first term / no GPA yet", value: 'first_term', next: 'transfer_goal' },
+      { label: "No — my GPA is below 2.0", value: 'no', next: 'exit_gpa' },
+    ],
+  },
+  transfer_goal: {
+    id: 'transfer_goal',
+    question: "Are you planning to transfer to a CSU or UC? This helps me recommend the right GE framework.",
+    options: [
+      { label: "CSU (Cal State)", value: 'csu', next: 'home_college' },
+      { label: "UC (University of California)", value: 'uc', next: 'home_college' },
+      { label: "Both / Not sure yet", value: 'unsure', next: 'home_college' },
+    ],
+  },
+  ucscu_type: {
+    id: 'ucscu_type',
+    question: "Which type of school are you currently at?",
+    options: [
+      { label: "CSU (Cal State)", value: 'csu', next: 'home_college' },
+      { label: "UC (University of California)", value: 'uc', next: 'home_college' },
+    ],
+  },
+  home_college: {
+    id: 'home_college',
+    question: "What is your home college? (Type the name — this helps us exclude it from search results.)",
+    type: 'text_input',
+    placeholder: 'e.g. Victor Valley College',
+    next: 'done',
+  },
+}
+
+const FIRST_STEP = 'student_type'
+
+function buildProfileMessage(answers) {
+  const type = answers.student_type
+  const goal = answers.transfer_goal
+  const ucscu = answers.ucscu_type
+  const homeCollege = answers.home_college
+
+  const homePart = homeCollege ? ` My home college is ${homeCollege} — please exclude it from course search results.` : ''
+
+  if (type === 'cc') {
+    const goalLabel = { csu: 'a CSU (Cal State)', uc: 'a UC (University of California)', unsure: 'a CSU or UC (still deciding)' }
+    return `My profile: I'm a domestic California Community College student (18+, GPA 2.0+) planning to transfer to ${goalLabel[goal] || 'a university'}.${homePart} I'm ready to find courses — let's get started.`
+  }
+  if (type === 'ucscu') {
+    const schoolLabel = { csu: 'a CSU (Cal State)', uc: 'a UC (University of California)' }
+    return `My profile: I'm a domestic student currently enrolled at ${schoolLabel[ucscu] || 'a UC or CSU'} and I want to take some courses at a California Community College through CVC for credit.${homePart} I'm ready to get started — what should I know first?`
+  }
+  return "I'm exploring how CVC works and what courses are available. Can you give me a quick overview?"
+}
+
+const PROFILE_KEY = 'cvc_profile'
+
+function loadProfile() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) } catch { return null }
+}
+function saveProfile(answers) {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(answers))
+}
+function clearProfile() {
+  localStorage.removeItem(PROFILE_KEY)
+}
+
+function profileSummary(answers) {
+  if (!answers) return []
+  const rows = []
+  const typeMap = { cc: 'CC student (transfer)', ucscu: 'UC / CSU student', other: 'Exploring' }
+  if (answers.student_type) rows.push({ label: 'Student type', value: typeMap[answers.student_type] || answers.student_type })
+  const visaVal = answers.visa_status || answers.visa_status_ucscu
+  if (visaVal) rows.push({ label: 'Visa status', value: visaVal === 'f1' ? 'F-1 international' : 'Domestic' })
+  if (answers.age_check) rows.push({ label: 'Age 18+', value: answers.age_check === 'yes' ? 'Yes' : 'No' })
+  if (answers.gpa_check) {
+    const gpaMap = { yes: '2.0+', first_term: 'First term', no: 'Below 2.0' }
+    rows.push({ label: 'GPA', value: gpaMap[answers.gpa_check] || answers.gpa_check })
+  }
+  if (answers.transfer_goal) {
+    const goalMap = { csu: 'Transferring to CSU', uc: 'Transferring to UC', unsure: 'CSU or UC (undecided)' }
+    rows.push({ label: 'Transfer goal', value: goalMap[answers.transfer_goal] || answers.transfer_goal })
+  }
+  if (answers.ucscu_type) {
+    const typeMap2 = { csu: 'CSU', uc: 'UC' }
+    rows.push({ label: 'Current school', value: typeMap2[answers.ucscu_type] || answers.ucscu_type })
+  }
+  if (answers.home_college) rows.push({ label: 'Home college', value: answers.home_college })
+  return rows
+}
+
+function makeInitialMessages(hasProfile) {
+  if (hasProfile) return [{ role: 'assistant', content: null, isWelcome: true }]
+  return [
+    { role: 'assistant', content: null, isWelcome: true },
+    { role: 'assistant', content: ONBOARDING[FIRST_STEP].question, isOnboarding: true, stepId: FIRST_STEP },
+  ]
+}
+
 export default function App() {
   const { t, lang, setLang } = useLang()
   const { theme, toggleTheme, fontSize, setFontSize } = useTheme()
   const [fontPopover, setFontPopover] = useState(false)
+  const [profilePopover, setProfilePopover] = useState(false)
 
   const [open, setOpen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
-  const [messages, setMessages] = useState(() => [
-    { role: 'assistant', content: null, isWelcome: true },
-  ])
+
+  const savedAnswers = loadProfile()
+  const [messages, setMessages] = useState(() => makeInitialMessages(!!savedAnswers))
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [homeCollege, setHomeCollege] = useState(null)
   const [unread, setUnread] = useState(1)
   const [savedCourses, setSavedCourses] = useState([])
+  const [onboarding, setOnboarding] = useState(
+    savedAnswers
+      ? { stepId: FIRST_STEP, done: true, answers: savedAnswers }
+      : { stepId: FIRST_STEP, done: false, answers: {} }
+  )
+  const [onboardingTextInput, setOnboardingTextInput] = useState('')
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
 
   function handleClear() {
     clearSession()
-    setMessages([{ role: 'assistant', content: null, isWelcome: true }])
     setSavedCourses([])
     setHomeCollege(null)
     setInput('')
+    // Re-prime the backend with profile context on the fresh session
+    const profile = loadProfile()
+    setMessages([{ role: 'assistant', content: null, isWelcome: true }])
+    if (profile) {
+      const contextMsg = buildProfileMessage(profile)
+      setLoading(true)
+      sendMessage(contextMsg)
+        .then(data => {
+          setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+          if (data.home_college) setHomeCollege(data.home_college)
+        })
+        .catch(() => {
+          setMessages(prev => [...prev, { role: 'assistant', content: "Welcome back! What subject or GE area are you looking for today?" }])
+        })
+        .finally(() => setLoading(false))
+    }
+  }
+
+  async function handleOnboardingTextSubmit(stepId, value) {
+    const step = ONBOARDING[stepId]
+    const trimmed = value.trim()
+    if (!trimmed) return
+    const newAnswers = { ...onboarding.answers, [step.id]: trimmed }
+    setOnboardingTextInput('')
+    setMessages(prev => [...prev, { role: 'user', content: trimmed }])
+
+    if (step.next === 'done') {
+      setOnboarding({ stepId, done: true, answers: newAnswers })
+      saveProfile(newAnswers)
+      const contextMsg = buildProfileMessage(newAnswers)
+      setMessages(prev => [...prev, { role: 'user', content: contextMsg, isHidden: true }])
+      setLoading(true)
+      try {
+        const data = await sendMessage(contextMsg)
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+        if (data.home_college) setHomeCollege(data.home_college)
+      } catch {
+        setMessages(prev => [...prev, { role: 'assistant', content: "Ready to help! What subject or GE area are you looking for?" }])
+      } finally {
+        setLoading(false)
+        inputRef.current?.focus()
+      }
+    }
+  }
+
+  function handleResetProfile() {
+    clearProfile()
+    clearSession()
+    setProfilePopover(false)
+    const fresh = makeInitialMessages(false)
+    setMessages(fresh)
+    setSavedCourses([])
+    setHomeCollege(null)
+    setInput('')
+    setOnboarding({ stepId: FIRST_STEP, done: false, answers: {} })
+  }
+
+  async function handleOnboardingAnswer(stepId, option) {
+    const step = ONBOARDING[stepId]
+    const newAnswers = { ...onboarding.answers, [step.id]: option.value }
+
+    setMessages(prev => [...prev, { role: 'user', content: option.label }])
+
+    if (option.next === 'exit_other') {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "No problem! CVC Exchange is open to California Community College students, but I can still walk you through what courses are available and how the system works. Feel free to ask anything.",
+        isOnboarding: true,
+      }])
+      setOnboarding({ stepId, done: true, answers: newAnswers })
+      saveProfile(newAnswers)
+      return
+    }
+
+    if (option.next === 'exit_f1') {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "Unfortunately, F-1 international students are not eligible to enroll through the CVC Exchange — enrolling at a second institution without prior approval could put your visa status at risk. You'd need to apply directly to each college via CCCApply. I can still help you understand available courses and general requirements. What would you like to know?",
+        isOnboarding: true,
+      }])
+      setOnboarding({ stepId, done: true, answers: newAnswers })
+      saveProfile(newAnswers)
+      return
+    }
+
+    if (option.next === 'exit_underage') {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "CVC Exchange requires students to be at least 18 years old. Dual-enrolled high school students are not eligible for the Exchange — you'd need to apply directly to each college via CCCApply. Once you turn 18 and are enrolled at a CCC, come back and I can help you find courses!",
+        isOnboarding: true,
+      }])
+      setOnboarding({ stepId, done: true, answers: newAnswers })
+      saveProfile(newAnswers)
+      return
+    }
+
+    if (option.next === 'exit_gpa') {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "CVC Exchange requires a GPA of 2.0 or higher to enroll. If your GPA is below 2.0, you'll need to raise it at your home college before using CVC. Your academic counselor can help you make a plan. I can still show you what courses exist so you know what to aim for — want to explore?",
+        isOnboarding: true,
+      }])
+      setOnboarding({ stepId, done: true, answers: newAnswers })
+      saveProfile(newAnswers)
+      return
+    }
+
+    if (option.next === 'done') {
+      setOnboarding({ stepId, done: true, answers: newAnswers })
+      saveProfile(newAnswers)
+      const contextMsg = buildProfileMessage(newAnswers)
+      setMessages(prev => [...prev, { role: 'user', content: contextMsg, isHidden: true }])
+      setLoading(true)
+      try {
+        const data = await sendMessage(contextMsg)
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+        if (data.home_college) setHomeCollege(data.home_college)
+      } catch (err) {
+        setMessages(prev => [...prev, { role: 'assistant', content: "Ready to help! What subject or GE area are you looking for?" }])
+      } finally {
+        setLoading(false)
+        inputRef.current?.focus()
+      }
+      return
+    }
+
+    // Advance to next step
+    const nextStep = ONBOARDING[option.next]
+    if (nextStep) {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: nextStep.question,
+        isOnboarding: true,
+        stepId: nextStep.id,
+      }])
+      setOnboarding({ stepId: nextStep.id, done: false, answers: newAnswers })
+    }
   }
 
   function handleSaveCourse(course) {
@@ -162,6 +442,23 @@ export default function App() {
     URL.revokeObjectURL(url)
   }
 
+  // On mount: if a profile already exists, prime the backend silently so the
+  // model knows the student's context without them having to re-answer anything.
+  useEffect(() => {
+    if (!savedAnswers) return
+    const contextMsg = buildProfileMessage(savedAnswers)
+    setLoading(true)
+    sendMessage(contextMsg)
+      .then(data => {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+        if (data.home_college) setHomeCollege(data.home_college)
+      })
+      .catch(() => {
+        setMessages(prev => [...prev, { role: 'assistant', content: "Welcome back! What subject or GE area are you looking for today?" }])
+      })
+      .finally(() => setLoading(false))
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (open) {
       setUnread(0)
@@ -177,6 +474,15 @@ export default function App() {
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
   }, [fontPopover])
+
+  useEffect(() => {
+    if (!profilePopover) return
+    function close(e) {
+      if (!e.target.closest('.header__profile-wrap')) setProfilePopover(false)
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [profilePopover])
 
   useEffect(() => {
     if (open) {
@@ -205,6 +511,23 @@ export default function App() {
           content: `${t('error_msg')}\n\n*${err.message}*`,
         },
       ])
+    } finally {
+      setLoading(false)
+      inputRef.current?.focus()
+    }
+  }
+
+  async function handleSearchGE(geTag) {
+    if (loading) return
+    const text = `Show me all available courses that satisfy ${geTag}`
+    setMessages(prev => [...prev, { role: 'user', content: text }])
+    setLoading(true)
+    try {
+      const data = await sendMessage(text)
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      if (data.home_college) setHomeCollege(data.home_college)
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'assistant', content: t('error_msg') }])
     } finally {
       setLoading(false)
       inputRef.current?.focus()
@@ -241,9 +564,40 @@ export default function App() {
             </div>
           </div>
           <div className="header__right">
-            {homeCollege && (
-              <span className="header__college" title={homeCollege}>{homeCollege}</span>
-            )}
+            {/* Profile button */}
+            <div className="header__profile-wrap">
+              <button
+                className={`header__profile${onboarding.done ? ' header__profile--set' : ''}`}
+                onClick={() => setProfilePopover(p => !p)}
+                aria-label="View or reset your profile"
+                title="Your profile"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </button>
+              {profilePopover && (
+                <div className="profile-popover">
+                  <div className="profile-popover__title">Your Profile</div>
+                  {onboarding.done && profileSummary(onboarding.answers).length > 0 ? (
+                    <ul className="profile-popover__list">
+                      {profileSummary(onboarding.answers).map(row => (
+                        <li key={row.label} className="profile-popover__row">
+                          <span className="profile-popover__label">{row.label}</span>
+                          <span className="profile-popover__value">{row.value}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="profile-popover__empty">No profile saved yet.</p>
+                  )}
+                  <button className="profile-popover__reset" onClick={handleResetProfile}>
+                    Reset profile & start over
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Export saved courses */}
             {savedCourses.length > 0 && (
@@ -380,15 +734,58 @@ export default function App() {
         {/* Messages */}
         <main className="chat">
           <div className="chat__messages">
-            {messages.map((msg, i) => (
-              <Message
-                key={i}
-                role={msg.role}
-                content={msg.isWelcome ? t('welcome') : msg.content}
-                onSaveCourse={handleSaveCourse}
-                savedCourses={savedCourses}
-              />
-            ))}
+            {messages.map((msg, i) => {
+              if (msg.isHidden) return null
+              const isLastOnboardingQ = msg.isOnboarding && msg.stepId && !onboarding.done && i === messages.length - 1
+              const stepForMsg = isLastOnboardingQ ? ONBOARDING[msg.stepId] : null
+              return (
+                <React.Fragment key={i}>
+                  <Message
+                    role={msg.role}
+                    content={msg.isWelcome ? t('welcome') : msg.content}
+                    onSaveCourse={handleSaveCourse}
+                    savedCourses={savedCourses}
+                    onSearchGE={handleSearchGE}
+                  />
+                  {stepForMsg && stepForMsg.type === 'text_input' ? (
+                    <form
+                      className="quick-replies quick-replies--text"
+                      onSubmit={e => { e.preventDefault(); handleOnboardingTextSubmit(msg.stepId, onboardingTextInput) }}
+                    >
+                      <input
+                        className="quick-reply-input"
+                        type="text"
+                        placeholder={stepForMsg.placeholder || 'Type your answer…'}
+                        value={onboardingTextInput}
+                        onChange={e => setOnboardingTextInput(e.target.value)}
+                        disabled={loading}
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        className="quick-reply-btn quick-reply-btn--submit"
+                        disabled={loading || !onboardingTextInput.trim()}
+                      >
+                        Continue →
+                      </button>
+                    </form>
+                  ) : stepForMsg ? (
+                    <div className="quick-replies">
+                      {stepForMsg.options.map(opt => (
+                        <button
+                          key={opt.value}
+                          className="quick-reply-btn"
+                          onClick={() => handleOnboardingAnswer(msg.stepId, opt)}
+                          disabled={loading}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </React.Fragment>
+              )
+            })}
             {loading && <Message role="assistant" isTyping />}
             <div ref={bottomRef} />
           </div>
