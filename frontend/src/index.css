@@ -396,6 +396,18 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255,255,255,0.07);
+  container-type: inline-size;
+}
+
+/* Hide lower-priority controls when header is narrow */
+@container (max-width: 400px) {
+  .header { padding: 10px 12px; }
+  .header__theme,
+  .header__lang { display: none; }
+}
+@container (max-width: 300px) {
+  .header__fontsize-wrap,
+  .header__export { display: none; }
 }
 
 .header__left {
@@ -935,6 +947,7 @@ body {
   box-shadow: var(--shadow-card);
   overflow: hidden;
   transition: box-shadow 0.15s, transform 0.15s;
+  container-type: inline-size;
 }
 
 .cc:hover {
@@ -1166,6 +1179,7 @@ body {
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .cc__cell-val {
@@ -1175,6 +1189,13 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Narrow card: tighter padding, allow values to wrap */
+@container (max-width: 300px) {
+  .cc__cell { padding: 6px 8px; gap: 6px; }
+  .cc__cell-val { white-space: normal; word-break: break-word; }
+  .cc__cell-icon { width: 12px; height: 12px; }
 }
 
 .cc__cell-val--empty {

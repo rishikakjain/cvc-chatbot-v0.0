@@ -6,7 +6,7 @@
 
 const translations = {
   en: {
-    advisor_name: 'Alex · CVC Advisor',
+    advisor_name: 'Alex',
     status_online: 'Online',
     status_demo: 'Demo mode',
     welcome:
@@ -21,7 +21,7 @@ const translations = {
     exit_fullscreen: 'Exit fullscreen',
   },
   es: {
-    advisor_name: 'Alex · Asesor CVC',
+    advisor_name: 'Alex',
     status_online: 'En línea',
     status_demo: 'Modo demo',
     welcome:
@@ -36,7 +36,7 @@ const translations = {
     exit_fullscreen: 'Salir de pantalla completa',
   },
   vi: {
-    advisor_name: 'Alex · Cố vấn CVC',
+    advisor_name: 'Alex',
     status_online: 'Trực tuyến',
     status_demo: 'Chế độ demo',
     welcome:
@@ -51,7 +51,7 @@ const translations = {
     exit_fullscreen: 'Thoát toàn màn hình',
   },
   zh: {
-    advisor_name: 'Alex · CVC 顾问',
+    advisor_name: 'Alex',
     status_online: '在线',
     status_demo: '演示模式',
     welcome:
@@ -66,7 +66,7 @@ const translations = {
     exit_fullscreen: '退出全屏',
   },
   tl: {
-    advisor_name: 'Alex · Tagapayo ng CVC',
+    advisor_name: 'Alex',
     status_online: 'Online',
     status_demo: 'Demo mode',
     welcome:

@@ -253,13 +253,18 @@ def _semantic_resolve(query: str) -> dict:
         client = boto3.client("bedrock-runtime", region_name=region)
 
         prompt = (
-            f'A student is looking for a GE course and said: "{query}"\n\n'
-            f"Match this to the most relevant GE area(s) from this list:\n{_GE_REFERENCE}\n"
+            f'A student typed: "{query}"\n\n'
+            f"Does this refer to a subject that is typically taught as a GE (General Education) transfer course? "
+            f"Match to a GE area only if the subject is genuinely offered as GE credit at California Community Colleges.\n\n"
+            f"GE areas:\n{_GE_REFERENCE}\n"
+            "NOT GE (set matched=false for these types): vocational/trade courses (welding, automotive, cosmetology, "
+            "culinary arts, nursing clinical, electrical work), purely professional programs (accounting, business admin, "
+            "computer programming, engineering), or any subject not typically offered for GE transfer credit.\n\n"
             "Reply with a JSON object only — no prose, no markdown fences:\n"
-            '{"matched": true, "title": "<area title>", "codes": ["<primary_code>", "<secondary_code>"], '
-            '"description": "<one sentence: what the area covers and why it matches the query>"}\n'
-            "If nothing plausibly matches, set matched=false and codes=[].\n"
-            "For math-related queries (trig, stats, calculus, algebra, quant): always return B4 and 2A."
+            '{"matched": true/false, "title": "<area title or empty>", "codes": ["<code>", ...], '
+            '"description": "<one sentence why it matches, or empty if not matched>"}\n'
+            "For math-related queries (trig, stats, calculus, algebra, quant): always return B4 and 2A.\n"
+            "When uncertain, prefer matched=false over a weak match."
         )
 
         response = client.converse(
