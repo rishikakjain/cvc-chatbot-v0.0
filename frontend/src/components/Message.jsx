@@ -64,11 +64,11 @@ function BotContent({ content, courses, onSaveCourse, savedCourses, onSearchGE }
   // trying to parse markdown. Fall back to parseCourses for older messages
   // that have no courses prop (e.g., session history loaded from DynamoDB).
   if (courses && courses.length > 0) {
-    // Strip bullet/list lines — the model sometimes leaks course details as
-    // markdown bullets even when told not to. Keep only non-list lines.
+    // Strip bullet lines and markdown table rows — the model sometimes leaks
+    // course details even when told not to. Keep only plain prose lines.
     const prose = content
       .split('\n')
-      .filter(line => !/^\s*[-*•]/.test(line))
+      .filter(line => !/^\s*[-*•]/.test(line) && !/^\s*\|/.test(line))
       .join('\n')
       .trim()
 

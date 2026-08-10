@@ -227,7 +227,7 @@ def converse(messages: list[dict]) -> tuple[str, list[dict]]:
                             returned_courses = json.loads(result_content)
                             if isinstance(returned_courses, list):
                                 for c in returned_courses:
-                                    dedup_key = f"{c.get('courseCode', '')}|{c.get('teachingCollege', '')}"
+                                    dedup_key = f"{c.get('courseCode', '')}|{c.get('teachingCollege', '')}|{c.get('professors', '')}|{c.get('startDate', '')}"
                                     if dedup_key not in courses_seen:
                                         courses_seen[dedup_key] = c
                         except (json.JSONDecodeError, AttributeError):
@@ -285,7 +285,11 @@ def extract_home_college(message: str, current: str | None) -> str | None:
     for trigger in ["i go to", "i'm at", "i am at", "my college is", "i attend", "home college is"]:
         idx = msg_lower.find(trigger)
         if idx != -1:
-            college = message[idx + len(trigger):].strip().rstrip(".,!?")
+            import re
+            rest = message[idx + len(trigger):].strip()
+            # Stop at clause conjunctions or sentence-ending punctuation
+            m = re.split(r',|\band\b|\bbut\b|\bso\b|[!?;]', rest, maxsplit=1)
+            college = m[0].strip().rstrip('.')
             if college:
                 return college.title()
     return None
