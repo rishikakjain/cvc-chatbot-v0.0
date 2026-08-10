@@ -28,7 +28,7 @@ from tools.explain_ge_area import explain_ge_area
 from tools.get_faq_answer import get_faq_answer
 
 REGION = os.environ.get("APP_REGION", os.environ.get("AWS_REGION", "us-west-2"))
-MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "anthropic.claude-haiku-4-5-20251001-v1:0")
+MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
 TABLE_NAME = os.environ.get("DYNAMODB_TABLE", "cvc_sessions")
 SESSION_TTL_SECONDS = 24 * 60 * 60
 
@@ -181,15 +181,19 @@ def _run_tool(name: str, tool_input: dict) -> str:
 
 # ── Converse API loop ─────────────────────────────────────────────────────────
 
-def converse(messages: list[dict]) -> str:
+def converse(messages: list[dict]) -> tuple[str, list[dict]]:
     """
     Run the Bedrock Converse API tool-use loop.
-    Returns the final text reply from Claude.
+    Returns (final_text_reply, courses) where courses is a list of course dicts
+    collected from any filter_courses tool calls made during this turn.
     """
     client = _get_bedrock()
     system_prompt = _load_system_prompt()
 
     current_messages = list(messages)
+    # Accumulate unique courses (deduped by courseCode+teachingCollege) across
+    # all filter_courses tool calls in this turn.
+    courses_seen: dict[str, dict] = {}
 
     for _ in range(10):  # max 10 tool-use rounds
         response = client.converse(
@@ -207,8 +211,8 @@ def converse(messages: list[dict]) -> str:
             # Extract text from the response
             for block in output_message.get("content", []):
                 if "text" in block:
-                    return block["text"]
-            return ""
+                    return block["text"], list(courses_seen.values())
+            return "", list(courses_seen.values())
 
         if stop_reason == "tool_use":
             tool_results = []
@@ -216,6 +220,19 @@ def converse(messages: list[dict]) -> str:
                 if "toolUse" in block:
                     tool_use = block["toolUse"]
                     result_content = _run_tool(tool_use["name"], tool_use["input"])
+
+                    # Collect courses returned by filter_courses
+                    if tool_use["name"] == "filter_courses":
+                        try:
+                            returned_courses = json.loads(result_content)
+                            if isinstance(returned_courses, list):
+                                for c in returned_courses:
+                                    dedup_key = f"{c.get('courseCode', '')}|{c.get('teachingCollege', '')}"
+                                    if dedup_key not in courses_seen:
+                                        courses_seen[dedup_key] = c
+                        except (json.JSONDecodeError, AttributeError):
+                            pass
+
                     tool_results.append({
                         "toolResult": {
                             "toolUseId": tool_use["toolUseId"],
@@ -225,7 +242,7 @@ def converse(messages: list[dict]) -> str:
 
             current_messages.append({"role": "user", "content": tool_results})
 
-    return "I'm having trouble processing that request. Please try again."
+    return "I'm having trouble processing that request. Please try again.", list(courses_seen.values())
 
 
 # ── Session management ────────────────────────────────────────────────────────
@@ -322,7 +339,7 @@ def lambda_handler(event: dict, context) -> dict:
     messages.append({"role": "user", "content": [{"text": message}]})
 
     try:
-        reply = converse(messages)
+        reply, courses = converse(messages)
     except Exception as exc:
         return _response(502, {"error": f"Model invocation failed: {exc}"})
 
@@ -336,4 +353,5 @@ def lambda_handler(event: dict, context) -> dict:
         "session_id": session_id,
         "turn_count": session["turn_count"],
         "home_college": session.get("home_college"),
+        "courses": courses,
     })

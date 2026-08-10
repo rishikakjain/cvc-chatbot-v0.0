@@ -20,6 +20,8 @@ const PLAIN_LABEL_RE = /^[\s]*[-•◦*]\s+([A-Za-z ]{2,24}):\s+(.*)/
 const FIELD_MAP = {
   college: 'college',
   'teaching college': 'college',
+  'course code': 'code',
+  code: 'code',
   delivery: 'delivery',
   'delivery method': 'delivery',
   'start date': 'startDate',
@@ -43,8 +45,12 @@ const FIELD_MAP = {
   'transfer credit': 'ge',
   note: 'note',
   notes: 'note',
+  textbook: 'note',
+  workload: 'note',
   units: 'units',
   'time commitment': 'note',
+  start: 'startDate',
+  end: 'endDate',
 }
 
 const COURSE_FIELDS = new Set(['college', 'delivery', 'startDate', 'professor', 'seats', 'ge'])
@@ -62,13 +68,22 @@ function parseGeString(str) {
 }
 
 function extractCodeFromName(raw) {
+  // Strip trailing " | College Name" from heading (model sometimes puts college in heading)
+  let cleaned = raw.replace(/\s*\|\s*[A-Z][^|]+$/, '').trim()
+
   // "College Algebra (MATH 232)" → { name: "College Algebra", code: "MATH 232" }
-  const parenMatch = raw.match(/^(.*?)\s*\(([A-Z]{2,8}\s*\d+[A-Z]?)\)\s*$/)
+  const parenMatch = cleaned.match(/^(.*?)\s*\(([A-Z]{2,8}\s*\d+[A-Z]?)\)\s*$/)
   if (parenMatch) return { name: parenMatch[1].trim(), code: parenMatch[2].trim() }
   // "KIN 201: Introduction to Exercise Physiology" → { name: "Introduction to Exercise Physiology", code: "KIN 201" }
-  const colonMatch = raw.match(/^([A-Z]{2,8}\s*\d+[A-Z]?):\s*(.+)$/)
+  const colonMatch = cleaned.match(/^([A-Z]{2,8}\s*\d+[A-Z]?):\s*(.+)$/)
   if (colonMatch) return { name: colonMatch[2].trim(), code: colonMatch[1].trim() }
-  return { name: raw.trim(), code: null }
+  return { name: cleaned, code: null }
+}
+
+function extractCollegeFromHeading(raw) {
+  // "US History Since 1865 | Victor Valley College" → "Victor Valley College"
+  const pipeMatch = raw.match(/\|\s*([A-Z][^|]+)$/)
+  return pipeMatch ? pipeMatch[1].trim() : null
 }
 
 export function parseMessageContent(markdown) {
@@ -93,16 +108,29 @@ export function parseMessageContent(markdown) {
     if (hasCourseField) {
       // Build course object
       const { name, code } = extractCodeFromName(currentHeading.raw)
+      const collegeFromHeading = extractCollegeFromHeading(currentHeading.raw)
       const autoIdx = blocks.filter(b => b.type === 'course').length + 1
+
+      // Handle "Oct 19, 2026 – Dec 12, 2026" date ranges in startDate field
+      let startDate = currentBullets.startDate || null
+      let endDate = currentBullets.endDate || null
+      if (startDate && !endDate) {
+        const rangeMatch = startDate.match(/^(.+?)\s*[–—-]\s*(.+)$/)
+        if (rangeMatch) {
+          startDate = rangeMatch[1].trim()
+          endDate = rangeMatch[2].trim()
+        }
+      }
+
       const course = {
         index: currentHeading.idx ?? autoIdx,
         name,
         code: currentBullets.code || code,
         units: currentBullets.units ? parseFloat(currentBullets.units) : currentHeading.units,
-        college: currentBullets.college || null,
+        college: currentBullets.college || collegeFromHeading || null,
         delivery: currentBullets.delivery || null,
-        startDate: currentBullets.startDate || null,
-        endDate: currentBullets.endDate || null,
+        startDate,
+        endDate,
         professor: currentBullets.professor || null,
         note: currentBullets.note || null,
         ge: currentBullets.ge || [],
@@ -159,21 +187,31 @@ export function parseMessageContent(markdown) {
     }
 
     if (currentHeading) {
-      // Try bold label first, then plain label
-      const bulletMatch = line.match(BOLD_LABEL_RE) || line.match(PLAIN_LABEL_RE)
-      if (bulletMatch) {
-        const [, key, val] = bulletMatch
-        const mapped = FIELD_MAP[key.toLowerCase().trim()]
-        if (mapped) {
-          if (mapped === 'ge') {
-            currentBullets.ge = parseGeString(val)
-          } else {
-            currentBullets[mapped] = val.trim()
+      // Split lines that combine multiple fields with " | " e.g. "- **Units:** 3 | **Delivery:** Async"
+      const isBulletLine = /^[\s]*[-•◦*]\s+/.test(line)
+      const segments = isBulletLine
+        ? line.replace(/^[\s]*[-•◦*]\s+/, '').split(/\s*\|\s*/).map((s, i) => i === 0 ? `- ${s}` : `- ${s}`)
+        : [line]
+
+      let matched = false
+      for (const seg of segments) {
+        const bulletMatch = seg.match(BOLD_LABEL_RE) || seg.match(PLAIN_LABEL_RE)
+        if (bulletMatch) {
+          matched = true
+          const [, key, val] = bulletMatch
+          const mapped = FIELD_MAP[key.toLowerCase().trim()]
+          if (mapped) {
+            if (mapped === 'ge') {
+              currentBullets.ge = parseGeString(val)
+            } else if (mapped === 'units') {
+              currentBullets.units = val.trim().split(/\s*[|,]/)[0].trim()
+            } else {
+              currentBullets[mapped] = val.trim()
+            }
           }
         }
-        // Stay in card even for unrecognised bullet keys (e.g. "Time Commitment:", "Next Steps:")
-        continue
       }
+      if (matched) continue
       // Blank line → stay in course context
       if (line.trim() === '') continue
       // Non-bullet non-blank line → end of course block

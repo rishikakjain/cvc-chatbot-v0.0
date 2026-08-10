@@ -65,6 +65,23 @@ def filter_courses(
     courses = load_courses(source_path)
     results = []
 
+    # Expand bare parent codes to sub-codes present in data
+    # e.g. "5" → ["5A","5B","5C"], "4" → ["4","4A",...,"4J"], "D" → ["D","D1",...,"D9"]
+    if ge_areas:
+        expanded = []
+        all_codes = set()
+        for c in courses:
+            for field in ("csuBreadth", "igetc", "calGetc"):
+                all_codes.update(c.get(field) or [])
+        for code in ge_areas:
+            cu = code.upper()
+            children = [c for c in all_codes if c.upper().startswith(cu) and c.upper() != cu]
+            if children:
+                expanded.extend(children)
+            else:
+                expanded.append(code)
+        ge_areas = expanded
+
     delivery_filter = None
     if delivery_method:
         dl = delivery_method.lower()

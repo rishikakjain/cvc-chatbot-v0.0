@@ -132,15 +132,13 @@ export default function CourseCard({ course, index, isSaved, onSave, onSearchGE 
             <span className={`cc__cell-val${!endDate ? ' cc__cell-val--empty' : ''}`}>{endDate || '—'}</span>
           </div>
         </div>
-        {professor && (
-          <div className="cc__cell">
-            <svg className="cc__cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <div className="cc__cell-body">
-              <span className="cc__cell-label">Instructor</span>
-              <span className="cc__cell-val">{professor}</span>
-            </div>
+        <div className="cc__cell">
+          <svg className="cc__cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div className="cc__cell-body">
+            <span className="cc__cell-label">Instructor</span>
+            <span className={`cc__cell-val${!professor ? ' cc__cell-val--empty' : ''}`}>{professor || '—'}</span>
           </div>
-        )}
+        </div>
         <div className="cc__cell">
           <svg className="cc__cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           <div className="cc__cell-body">

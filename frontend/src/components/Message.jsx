@@ -28,7 +28,102 @@ function CourseInfoFooter() {
   )
 }
 
-function BotContent({ content, onSaveCourse, savedCourses, onSearchGE }) {
+/**
+ * Convert a course object from the API response (summarize_course shape) to
+ * the CourseCard component's expected shape.
+ */
+function apiCourseToCourseCard(course, index) {
+  let seatsAvailable = null
+  let seatsTotal = null
+  if (course.availableSeats) {
+    const match = String(course.availableSeats).match(/(\d+)\s+out\s+of\s+(\d+)/i)
+    if (match) {
+      seatsAvailable = parseInt(match[1], 10)
+      seatsTotal = parseInt(match[2], 10)
+    }
+  }
+  return {
+    index,
+    name: course.courseName || '',
+    code: course.courseCode || '',
+    units: typeof course.units === 'number' ? course.units : parseFloat(course.units) || null,
+    college: course.teachingCollege || '',
+    delivery: course.deliveryMethod || '',
+    startDate: course.startDate || '',
+    endDate: course.endDate || '',
+    professor: course.professors || '',
+    note: course.courseNotes || '',
+    ge: Array.isArray(course.geChips) ? course.geChips : [],
+    seatsAvailable,
+    seatsTotal,
+  }
+}
+
+function BotContent({ content, courses, onSaveCourse, savedCourses, onSearchGE }) {
+  // If the API returned structured course data, use it directly instead of
+  // trying to parse markdown. Fall back to parseCourses for older messages
+  // that have no courses prop (e.g., session history loaded from DynamoDB).
+  if (courses && courses.length > 0) {
+    // Strip bullet/list lines — the model sometimes leaks course details as
+    // markdown bullets even when told not to. Keep only non-list lines.
+    const prose = content
+      .split('\n')
+      .filter(line => !/^\s*[-*•]/.test(line))
+      .join('\n')
+      .trim()
+
+    return (
+      <div className="bot-content">
+        {prose && (
+          <ReactMarkdown
+            components={{
+              a: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+              ),
+            }}
+          >
+            {prose}
+          </ReactMarkdown>
+        )}
+        {courses.map((c, i) => {
+          const card = apiCourseToCourseCard(c, i + 1)
+          const key = `${card.name}|${card.college}`
+          const isSaved = savedCourses.some(s => `${s.name}|${s.college}` === key)
+          return (
+            <CourseCard
+              key={i}
+              course={card}
+              index={card.index}
+              isSaved={isSaved}
+              onSave={() => onSaveCourse(card)}
+              onSearchGE={onSearchGE}
+            />
+          )
+        })}
+        <CourseInfoFooter />
+      </div>
+    )
+  }
+
+  // courses === [] means new API message with no course results — render plain markdown.
+  // courses === undefined means old session history that may have inline course cards.
+  if (courses !== undefined) {
+    return (
+      <div className="bot-content">
+        <ReactMarkdown
+          components={{
+            a: ({ href, children }) => (
+              <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+            ),
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    )
+  }
+
+  // Fallback: parse markdown for backward compat (session history, etc.)
   const blocks = parseMessageContent(content)
   const hasCourses = blocks.some(b => {
     if (b.type !== 'course') return false
@@ -69,7 +164,7 @@ function BotContent({ content, onSaveCourse, savedCourses, onSearchGE }) {
   )
 }
 
-export default function Message({ role, content, isTyping, onSaveCourse, savedCourses, onSearchGE }) {
+export default function Message({ role, content, courses, isTyping, onSaveCourse, savedCourses, onSearchGE }) {
   const isBot = role === 'assistant'
 
   return (
@@ -81,7 +176,7 @@ export default function Message({ role, content, isTyping, onSaveCourse, savedCo
             <span /><span /><span />
           </span>
         ) : isBot ? (
-          <BotContent content={content} onSaveCourse={onSaveCourse} savedCourses={savedCourses || []} onSearchGE={onSearchGE} />
+          <BotContent content={content} courses={courses} onSaveCourse={onSaveCourse} savedCourses={savedCourses || []} onSearchGE={onSearchGE} />
         ) : (
           <p>{content}</p>
         )}

@@ -25,15 +25,20 @@
   --shadow: 0 2px 8px rgba(0,30,80,0.08), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-lg: 0 20px 60px rgba(0,20,60,0.22), 0 4px 16px rgba(0,0,0,0.08);
   --shadow-card: 0 2px 12px rgba(0,30,80,0.07);
+  /* Type scale — 4 stops, used everywhere */
+  --fs-xs:   11px;
+  --fs-sm:   12px;
+  --fs-base: 14px;
+  --fs-lg:   16px;
 }
 
 /* ── Font size scaling (scoped to chat window) ───────────── */
 /* --chat-font is injected as an inline style on the chat-window element */
 
 .chat-window {
-  --chat-font: 15px;
+  --chat-font: var(--fs-base);
   --chat-font-sm: calc(var(--chat-font) - 2px);
-  --chat-font-xs: calc(var(--chat-font) - 3.5px);
+  --chat-font-xs: calc(var(--chat-font) - 3px);
 }
 
 .chat-window .message__bubble      { font-size: var(--chat-font); }
@@ -78,7 +83,7 @@ html, body, #root {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 15px;
+  font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--color-text);
   background: #fff;
@@ -126,7 +131,7 @@ body {
 }
 
 .cvc-nav__logo-ccc {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: white;
   line-height: 1.4;
   font-weight: 400;
@@ -139,7 +144,7 @@ body {
 }
 
 .cvc-nav__logo-cvc {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: white;
   line-height: 1.4;
   font-weight: 400;
@@ -156,7 +161,7 @@ body {
 .cvc-nav__links a {
   color: white;
   text-decoration: none;
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 400;
   opacity: 0.9;
   cursor: default;
@@ -175,7 +180,7 @@ body {
   border-radius: 4px;
   cursor: default;
   border: none;
-  font-size: 13px;
+  font-size: var(--fs-base);
   padding: 8px 18px;
 }
 
@@ -188,14 +193,14 @@ body {
   background: transparent;
   color: white;
   border: 2px solid var(--cvc-orange);
-  font-size: 13px;
+  font-size: var(--fs-base);
   padding: 7px 16px;
 }
 
 .cvc-btn--check {
   background: var(--cvc-orange);
   color: var(--cvc-navy);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   padding: 10px 22px;
   letter-spacing: 0.04em;
   border-radius: 3px;
@@ -244,7 +249,7 @@ body {
 }
 
 .cvc-content__body {
-  font-size: 15px;
+  font-size: var(--fs-base);
   color: #444;
   line-height: 1.6;
   margin: 0 0 20px;
@@ -276,7 +281,7 @@ body {
 }
 
 .cvc-how-list li {
-  font-size: 15px;
+  font-size: var(--fs-base);
   color: #444;
   line-height: 1.6;
   margin-bottom: 10px;
@@ -332,7 +337,7 @@ body {
   border-radius: 50%;
   background: var(--cvc-navy);
   border: 2px solid white;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: white;
   display: flex;
@@ -407,7 +412,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 800;
   color: var(--cvc-navy);
   flex-shrink: 0;
@@ -420,14 +425,14 @@ body {
 }
 
 .header__name {
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 600;
   color: white;
   line-height: 1.2;
 }
 
 .header__status {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: rgba(255,255,255,0.6);
   display: flex;
   align-items: center;
@@ -450,7 +455,7 @@ body {
 }
 
 .header__college {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: rgba(255,255,255,0.65);
   background: rgba(255,255,255,0.1);
   padding: 2px 8px;
@@ -514,7 +519,7 @@ body {
 }
 
 .profile-popover__title {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -538,20 +543,20 @@ body {
 }
 
 .profile-popover__label {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
 .profile-popover__value {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--color-text);
   text-align: right;
 }
 
 .profile-popover__empty {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--color-text-muted);
   margin-bottom: 12px;
 }
@@ -559,7 +564,7 @@ body {
 .profile-popover__reset {
   width: 100%;
   padding: 7px 0;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: #ef4444;
   background: rgba(239,68,68,0.06);
@@ -616,7 +621,7 @@ body {
   border: none;
   background: var(--cvc-orange);
   color: var(--cvc-navy);
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
@@ -649,7 +654,7 @@ body {
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
-  font-size: 16px;
+  font-size: var(--fs-lg);
   font-weight: 700;
   line-height: 1;
   font-family: inherit;
@@ -676,7 +681,7 @@ body {
 }
 
 .fontsize-popover__label {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
@@ -690,7 +695,7 @@ body {
 }
 
 .fontsize-popover__sm {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--color-text-muted);
   font-weight: 600;
   flex-shrink: 0;
@@ -714,7 +719,7 @@ body {
 }
 
 .fontsize-popover__value {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   text-align: center;
 }
@@ -755,7 +760,7 @@ body {
   border: none;
   border-radius: 6px;
   color: white;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-family: inherit;
   padding: 3px 6px;
   cursor: pointer;
@@ -776,7 +781,7 @@ body {
 .header__lang select option {
   background: var(--cvc-navy);
   color: white;
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 
 /* ── Chat body ───────────────────────────────────────────── */
@@ -822,7 +827,7 @@ body {
   border-radius: 50%;
   background: linear-gradient(135deg, var(--cvc-orange) 0%, #ffcc00 100%);
   color: var(--cvc-navy);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -836,7 +841,7 @@ body {
   padding: 11px 15px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  font-size: 13.5px;
+  font-size: var(--fs-base);
   line-height: 1.65;
   word-break: break-word;
 }
@@ -875,12 +880,12 @@ body {
   padding: 3px 10px;
   margin: 6px 0;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: var(--fs-base);
 }
 .message--bot .message__bubble h1,
 .message--bot .message__bubble h2,
 .message--bot .message__bubble h3 {
-  font-size: 13.5px;
+  font-size: var(--fs-base);
   font-weight: 600;
   margin: 8px 0 3px;
 }
@@ -964,7 +969,7 @@ body {
   border-radius: 50%;
   background: var(--cvc-navy-grad);
   color: white;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -981,7 +986,7 @@ body {
 }
 
 .cc__name {
-  font-size: 14px;
+  font-size: var(--fs-base);
   font-weight: 700;
   color: var(--color-text);
   line-height: 1.3;
@@ -995,7 +1000,7 @@ body {
 }
 
 .cc__code {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-family: monospace;
   background: rgba(0,51,102,0.08);
   color: var(--cvc-navy);
@@ -1010,7 +1015,7 @@ body {
 }
 
 .cc__college {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
 }
 
@@ -1024,7 +1029,7 @@ body {
 }
 
 .cc__units small {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   opacity: 0.7;
 }
@@ -1042,7 +1047,7 @@ body {
 }
 
 .cc-chip {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   padding: 3px 9px;
   border-radius: 99px;
@@ -1155,7 +1160,7 @@ body {
 }
 
 .cc__cell-label {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1164,7 +1169,7 @@ body {
 }
 
 .cc__cell-val {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--color-text);
   font-weight: 500;
   white-space: nowrap;
@@ -1209,12 +1214,12 @@ body {
 }
 
 .cc-seats__count {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   font-weight: 700;
 }
 
 .cc-seats__label {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 500;
   opacity: 0.8;
 }
@@ -1229,7 +1234,7 @@ body {
   background: rgba(245,196,0,0.07);
   border-left: 3px solid var(--cvc-orange);
   border-radius: 0 6px 6px 0;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--color-text-muted);
   line-height: 1.5;
 }
@@ -1306,7 +1311,7 @@ body {
   border-radius: 50%;
   background: var(--cvc-navy);
   color: white;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -1322,27 +1327,27 @@ body {
 }
 
 .course-card__name {
-  font-size: 13.5px;
+  font-size: var(--fs-base);
   font-weight: 600;
   color: var(--color-text);
   line-height: 1.3;
 }
 
 .course-card__code {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   font-family: monospace;
 }
 
 .course-card__college {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   font-style: italic;
 }
 
 .course-card__units {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--cvc-navy);
   background: rgba(0, 51, 102, 0.08);
@@ -1363,7 +1368,7 @@ body {
 }
 
 .course-card__chip {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 99px;
@@ -1430,7 +1435,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--color-text-muted);
 }
 
@@ -1462,13 +1467,13 @@ body {
 }
 
 .course-card__seats-label {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .course-card__note {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   font-style: italic;
   border-left: 2px solid var(--color-border);
@@ -1490,7 +1495,7 @@ body {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   border-radius: 99px;
   cursor: pointer;
@@ -1542,7 +1547,7 @@ body {
   align-items: center;
   gap: 5px;
   padding: 8px 14px;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   border-radius: 99px;
   cursor: pointer;
@@ -1604,7 +1609,7 @@ body {
   border-radius: 14px;
   padding: 10px 14px;
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: var(--fs-base);
   line-height: 1.5;
   color: var(--color-text);
   background: var(--color-bg);
@@ -1680,7 +1685,7 @@ body {
   color: var(--cvc-navy);
   border-radius: 99px;
   padding: 7px 16px;
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -1721,7 +1726,7 @@ body {
   border: 1.5px solid var(--cvc-navy);
   border-radius: 99px;
   padding: 7px 16px;
-  font-size: 13px;
+  font-size: var(--fs-base);
   background: var(--color-surface);
   color: var(--color-text);
   outline: none;
@@ -1735,7 +1740,7 @@ body {
 .quick-reply-btn--submit {
   border-radius: 99px;
   padding: 7px 18px;
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 600;
   background: var(--cvc-navy);
   color: #fff;
@@ -1787,7 +1792,7 @@ body {
 
 .course-info-footer__label {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -1797,7 +1802,7 @@ body {
 
 .course-info-footer__text {
   display: block;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   line-height: 1.5;
 }
@@ -1809,7 +1814,7 @@ body {
 
 .chat__disclaimer {
   margin-top: 6px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   text-align: center;
   line-height: 1.4;
@@ -1824,7 +1829,7 @@ body {
 
 .chat__powered {
   text-align: center;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
   margin-top: 4px;
 }

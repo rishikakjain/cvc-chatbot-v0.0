@@ -2,11 +2,14 @@
 explain_ge_area — translates GE area codes and plain-language terms into
 human-readable descriptions for the CVC chatbot.
 
-Supports CSU Breadth, IGETC, and Cal-GETC codes, plus common plain-language
-phrases a student might type ("science with a lab", "english comp", etc.).
+Fast path: exact code match + alias list (no API call).
+Fallback: Bedrock Haiku semantic resolution for unrecognised queries.
 """
 
 from __future__ import annotations
+
+import json
+import os
 
 # Canonical GE area definitions. Each entry covers all three frameworks
 # where the area exists, plus plain-language aliases for fuzzy matching.
@@ -221,16 +224,70 @@ def explain_ge_area(query: str) -> dict:
                 "codes": area["codes"],
             }
 
-    # No match — return helpful fallback
-    return {
-        "matched": False,
-        "title": "Unknown GE Area",
-        "description": (
-            f"I don't recognize '{query}' as a GE area code or subject. "
-            "Common GE areas include: Written Communication (A2/1A), Math (B4/2A), "
-            "Physical Science (B1/5A), Life Science (B2/5B), Science Lab (B3/5C), "
-            "Arts (C1/3A), Humanities (C2/3B), and Social Sciences (D/4). "
-            "You can also ask me about IGETC, CSU Breadth, or Cal-GETC."
-        ),
-        "codes": [],
-    }
+    # Semantic fallback via Bedrock
+    return _semantic_resolve(query)
+
+
+_GE_REFERENCE = """\
+GE areas and their codes (CSU Breadth / IGETC / Cal-GETC):
+- Oral Communication / Speech: A1, 1C
+- Written Communication / English Composition: A2, 1A
+- Critical Thinking / Logic / Argument: A3, 1B
+- Physical Science (physics, chemistry, earth science, astronomy, oceanography): B1, 5A
+- Life Science / Biology (biology, anatomy, botany, zoology, ecology, physiology): B2, 5B
+- Science Laboratory (hands-on lab, lab component, lab science): B3, 5C
+- Mathematics / Quantitative Reasoning (math, algebra, calculus, trigonometry, statistics, precalculus): B4, 2A
+- Arts (music, theater, dance, film, studio art, performing arts, fine arts): C1, 3A
+- Humanities (literature, philosophy, languages, foreign language, history of art): C2, 3B
+- Social Sciences (psychology, sociology, history, political science, economics, anthropology, geography, human behavior): D / D1-D9, 4 / 4A-4J
+- Lifelong Understanding / Health / PE / Kinesiology / Wellness: E
+- Ethnic Studies (race, diversity, Chicano, African American, Asian American studies): F
+"""
+
+
+def _semantic_resolve(query: str) -> dict:
+    """Call Bedrock Haiku to match an unrecognised query to a GE area."""
+    try:
+        import boto3
+        region = os.environ.get("APP_REGION", os.environ.get("AWS_REGION", "us-west-2"))
+        client = boto3.client("bedrock-runtime", region_name=region)
+
+        prompt = (
+            f'A student is looking for a GE course and said: "{query}"\n\n'
+            f"Match this to the most relevant GE area(s) from this list:\n{_GE_REFERENCE}\n"
+            "Reply with a JSON object only — no prose, no markdown fences:\n"
+            '{"matched": true, "title": "<area title>", "codes": ["<primary_code>", "<secondary_code>"], '
+            '"description": "<one sentence: what the area covers and why it matches the query>"}\n'
+            "If nothing plausibly matches, set matched=false and codes=[].\n"
+            "For math-related queries (trig, stats, calculus, algebra, quant): always return B4 and 2A."
+        )
+
+        response = client.converse(
+            modelId="us.anthropic.claude-haiku-4-5-20251001-v1:0",
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+        )
+
+        text = response["output"]["message"]["content"][0]["text"].strip()
+        if text.startswith("```"):
+            text = text.split("```")[1]
+            if text.startswith("json"):
+                text = text[4:]
+        result = json.loads(text.strip())
+        return {
+            "matched": bool(result.get("matched")),
+            "title": result.get("title", "Unknown GE Area"),
+            "description": result.get("description", ""),
+            "codes": result.get("codes", []),
+        }
+    except Exception:
+        return {
+            "matched": False,
+            "title": "Unknown GE Area",
+            "description": (
+                f"I don't recognize '{query}' as a GE area code or subject. "
+                "Common GE areas include: Written Communication (A2/1A), Math (B4/2A), "
+                "Physical Science (B1/5A), Life Science (B2/5B), Science Lab (B3/5C), "
+                "Arts (C1/3A), Humanities (C2/3B), and Social Sciences (D/4)."
+            ),
+            "codes": [],
+        }

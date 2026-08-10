@@ -277,7 +277,7 @@ export default function App() {
       setLoading(true)
       sendMessage(contextMsg)
         .then(data => {
-          setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+          setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
           if (data.home_college) setHomeCollege(data.home_college)
         })
         .catch(() => {
@@ -303,7 +303,7 @@ export default function App() {
       setLoading(true)
       try {
         const data = await sendMessage(contextMsg)
-        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
         if (data.home_college) setHomeCollege(data.home_college)
       } catch {
         setMessages(prev => [...prev, { role: 'assistant', content: "Ready to help! What subject or GE area are you looking for?" }])
@@ -384,7 +384,7 @@ export default function App() {
       setLoading(true)
       try {
         const data = await sendMessage(contextMsg)
-        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
         if (data.home_college) setHomeCollege(data.home_college)
       } catch (err) {
         setMessages(prev => [...prev, { role: 'assistant', content: "Ready to help! What subject or GE area are you looking for?" }])
@@ -450,7 +450,7 @@ export default function App() {
     setLoading(true)
     sendMessage(contextMsg)
       .then(data => {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
         if (data.home_college) setHomeCollege(data.home_college)
       })
       .catch(() => {
@@ -501,7 +501,7 @@ export default function App() {
 
     try {
       const data = await sendMessage(text)
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
       if (data.home_college) setHomeCollege(data.home_college)
     } catch (err) {
       setMessages(prev => [
@@ -524,7 +524,7 @@ export default function App() {
     setLoading(true)
     try {
       const data = await sendMessage(text)
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
       if (data.home_college) setHomeCollege(data.home_college)
     } catch (err) {
       setMessages(prev => [...prev, { role: 'assistant', content: t('error_msg') }])
@@ -743,6 +743,7 @@ export default function App() {
                   <Message
                     role={msg.role}
                     content={msg.isWelcome ? t('welcome') : msg.content}
+                    courses={msg.courses}
                     onSaveCourse={handleSaveCourse}
                     savedCourses={savedCourses}
                     onSearchGE={handleSearchGE}
