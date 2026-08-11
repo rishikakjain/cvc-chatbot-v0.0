@@ -117,6 +117,9 @@ def deploy_session_lambda(lambda_client, role_arn: str, env_vars: dict) -> str:
         "DYNAMODB_TABLE": DYNAMO_TABLE,
         "APP_REGION": AWS_REGION,
     }
+    guardrail_id = os.environ.get("BEDROCK_GUARDRAIL_ID")
+    if guardrail_id:
+        env["BEDROCK_GUARDRAIL_ID"] = guardrail_id
 
     try:
         resp = lambda_client.get_function(FunctionName=LAMBDA_NAME)

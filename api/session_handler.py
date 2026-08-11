@@ -30,6 +30,7 @@ from tools.get_faq_answer import get_faq_answer
 REGION = os.environ.get("APP_REGION", os.environ.get("AWS_REGION", "us-west-2"))
 MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
 TABLE_NAME = os.environ.get("DYNAMODB_TABLE", "cvc_sessions")
+GUARDRAIL_ID = os.environ.get("BEDROCK_GUARDRAIL_ID")
 SESSION_TTL_SECONDS = 24 * 60 * 60
 
 SYSTEM_PROMPT_PATH = os.path.join(
@@ -215,12 +216,47 @@ def _strip_course_prose(text: str) -> str:
     return '\n'.join(parts).strip()
 
 
+_GUARDRAIL_BLOCKED_REPLY = (
+    "I can only help with CVC course advising — "
+    "try asking me to find a course or explain a GE requirement!\n\n"
+    "1. Search for courses in a GE area\n"
+    "2. Explain what IGETC or CSU GE Breadth means"
+)
+
+
+def _check_guardrail(text: str) -> bool:
+    """Return True if the guardrail blocks this text (GUARDRAIL_INTERVENED)."""
+    if not GUARDRAIL_ID:
+        return False
+    try:
+        resp = _get_bedrock().apply_guardrail(
+            guardrailIdentifier=GUARDRAIL_ID,
+            guardrailVersion="DRAFT",
+            source="INPUT",
+            content=[{"text": {"text": text}}],
+        )
+        return resp.get("action") == "GUARDRAIL_INTERVENED"
+    except Exception:
+        return False
+
+
 def converse(messages: list[dict]) -> tuple[str, list[dict]]:
     """
     Run the Bedrock Converse API tool-use loop.
     Returns (final_text_reply, courses) where courses is a list of course dicts
     collected from any filter_courses tool calls made during this turn.
     """
+    # Pre-flight guardrail check on the latest user message
+    if messages and GUARDRAIL_ID:
+        last = messages[-1]
+        if last.get("role") == "user":
+            content = last.get("content", [])
+            user_text = " ".join(
+                b.get("text", "") for b in content if isinstance(b, dict) and "text" in b
+            )
+            if _check_guardrail(user_text):
+                return _GUARDRAIL_BLOCKED_REPLY, []
+
     client = _get_bedrock()
     system_prompt = _load_system_prompt()
 
@@ -230,16 +266,20 @@ def converse(messages: list[dict]) -> tuple[str, list[dict]]:
     courses_seen: dict[str, dict] = {}
 
     for _ in range(10):  # max 10 tool-use rounds
-        response = client.converse(
+        converse_kwargs = dict(
             modelId=MODEL_ID,
             system=[{"text": system_prompt}],
             messages=current_messages,
             toolConfig=TOOL_CONFIG,
         )
+        response = client.converse(**converse_kwargs)
 
         stop_reason = response["stopReason"]
         output_message = response["output"]["message"]
         current_messages.append(output_message)
+
+        if stop_reason == "guardrail_intervened":
+            return _GUARDRAIL_BLOCKED_REPLY, []
 
         if stop_reason == "end_turn":
             for block in output_message.get("content", []):
