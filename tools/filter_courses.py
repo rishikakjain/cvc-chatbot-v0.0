@@ -164,6 +164,9 @@ def summarize_course(course: dict) -> dict:
 
     available = course.get("seatsAvailable")
     total = course.get("seatCount")
+    # Clamp negative seat counts to 0 (data quality issue in source CSV)
+    if available is not None:
+        available = max(0, int(available))
     if available is not None and total:
         seats_str = f"{available} out of {total}"
     elif available is not None:
@@ -181,11 +184,15 @@ def summarize_course(course: dict) -> dict:
     for code in (course.get("calGetc") or []):
         ge_chips.append(f"Cal-GETC {code}")
 
+    units = course.get("units")
+    if units is not None:
+        units = units if units > 0 else None  # treat 0-unit courses as unknown
+
     return {
         "courseCode": course.get("courseCode"),
         "courseName": _normalize_name(course.get("courseName")),
         "teachingCollege": course.get("teachingCollege"),
-        "units": course.get("units"),
+        "units": units,
         "deliveryMethod": course.get("deliveryMethod"),
         "startDate": course.get("startDate"),
         "endDate": course.get("endDate"),
