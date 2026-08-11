@@ -308,6 +308,35 @@ def main() -> None:
     print("\n2. Session Lambda")
     fn_arn = deploy_session_lambda(lambda_client, role_arn, env_vars)
 
+    print("\n2b. Guardrail (via Lambda credentials)")
+    import time as _time
+    _time.sleep(5)  # let Lambda propagate before invoking
+    try:
+        import base64
+        resp = lambda_client.invoke(
+            FunctionName=LAMBDA_NAME,
+            Payload=json.dumps({"__action__": "setup_guardrail"}).encode(),
+        )
+        result = json.loads(resp["Payload"].read())
+        if "error" in result:
+            print(f"  Guardrail setup failed: {result['error']}")
+        else:
+            gid = result["guardrailId"]
+            action = "Created" if result.get("created") else "Found existing"
+            print(f"  {action} guardrail: {gid}")
+            # Write guardrail ID back into Lambda env
+            current_env = lambda_client.get_function_configuration(
+                FunctionName=LAMBDA_NAME
+            )["Environment"]["Variables"]
+            current_env["BEDROCK_GUARDRAIL_ID"] = gid
+            lambda_client.update_function_configuration(
+                FunctionName=LAMBDA_NAME,
+                Environment={"Variables": current_env},
+            )
+            print(f"  Set BEDROCK_GUARDRAIL_ID={gid} on Lambda")
+    except Exception as e:
+        print(f"  Guardrail setup skipped: {e}")
+
     print("\n3. API Gateway")
     api_id, api_url = deploy_api_gateway(apigw, fn_arn)
     allow_apigw_invoke(lambda_client, fn_arn, api_id, account_id)

@@ -429,7 +429,54 @@ def _response(status: int, body: dict) -> dict:
     }
 
 
+def _setup_guardrail() -> dict:
+    """Create or find the cvc-scope-guard guardrail using Lambda's own credentials."""
+    bedrock_cp = boto3.client("bedrock", region_name=REGION)
+    guardrail_name = "cvc-scope-guard"
+    # Check if it already exists
+    try:
+        existing = bedrock_cp.list_guardrails()
+        for g in existing.get("guardrails", []):
+            if g["name"] == guardrail_name:
+                return {"guardrailId": g["id"], "created": False}
+    except Exception:
+        pass
+    # Create it
+    resp = bedrock_cp.create_guardrail(
+        name=guardrail_name,
+        description="Restricts CVC chatbot to course advising topics only",
+        topicPolicyConfig={
+            "topicsConfig": [{
+                "name": "off_topic",
+                "definition": "Requests completely unrelated to courses, college enrollment, or academic advising. Includes creative writing, poems, general trivia, cooking, weather.",
+                "examples": [
+                    "Write me an essay about climate change",
+                    "What is the capital of France?",
+                    "Write a poem about flowers",
+                ],
+                "type": "DENY",
+            }]
+        },
+        blockedInputMessaging=(
+            "I can only help with CVC course advising — "
+            "try asking me to find a course or explain a GE requirement!"
+        ),
+        blockedOutputsMessaging=(
+            "I can only help with CVC course advising — "
+            "try asking me to find a course or explain a GE requirement!"
+        ),
+    )
+    return {"guardrailId": resp["guardrailId"], "guardrailArn": resp["guardrailArn"], "created": True}
+
+
 def lambda_handler(event: dict, context) -> dict:
+    # Internal setup action — invoked directly by setup_api.py, not via API Gateway
+    if event.get("__action__") == "setup_guardrail":
+        try:
+            return _setup_guardrail()
+        except Exception as e:
+            return {"error": str(e)}
+
     if event.get("requestContext", {}).get("http", {}).get("method") == "OPTIONS":
         return _response(200, {})
 
