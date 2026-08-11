@@ -182,38 +182,86 @@ def _run_tool(name: str, tool_input: dict) -> str:
 
 # ── Converse API loop ─────────────────────────────────────────────────────────
 
-def _strip_course_prose(text: str) -> str:
+def _strip_course_prose(text: str, has_courses: bool = True) -> str:
     """
-    When filter_courses returned results, keep only:
-    - The first plain-text intro sentence
-    - Numbered follow-up options (1. ... 2. ...)
-    Everything else is already rendered on the course cards.
+    Normalise the model reply after filter_courses was called.
+
+    With courses (has_courses=True): keep only the first intro sentence +
+    action-verb numbered follow-ups. Everything else is on the cards.
+
+    Without courses (has_courses=False): keep plain prose sentences but
+    strip markdown tables (| lines) and bullet lists (- / * lines), which
+    the model uses to describe why nothing was found. Numbered follow-ups
+    are always kept.
     """
     import re
-    # Follow-up options always start with an action verb — course listings never do
     followup_action = re.compile(
         r'^\d+\.\s+\*{0,2}(search|show|filter|find|explain|tell|compare|narrow|look|get|see|ask|check|help|what|how|which|can you|display)',
         re.I
     )
-    intro = None
-    numbered = []
+
+    if has_courses:
+        intro = None
+        numbered = []
+        for line in text.splitlines():
+            t = line.strip()
+            if not t:
+                continue
+            if re.match(r'^\d+\.', t):
+                if followup_action.match(t):
+                    numbered.append(line)
+            elif intro is None and not t.startswith('|') and not re.match(r'^[-*•#]', t) and not re.match(r'^---', t):
+                first_sentence = re.split(r':\s*$', t)[0]
+                intro = first_sentence
+        parts = []
+        if intro:
+            parts.append(intro.rstrip('.') + '.')
+        if numbered:
+            parts.extend(numbered)
+        return '\n'.join(parts).strip()
+    else:
+        # Zero-results path: strip bullets/tables but keep prose + numbered options
+        kept = []
+        for line in text.splitlines():
+            t = line.strip()
+            if not t:
+                kept.append('')
+                continue
+            # Drop markdown table rows and bullet lines
+            if t.startswith('|') or re.match(r'^[-*•]{1,2}\s', t) or re.match(r'^---', t):
+                continue
+            # Strip bold headers like "**No courses found**" on their own line
+            if re.match(r'^\*{2}[^*]+\*{2}$', t):
+                continue
+            # Keep numbered options and plain prose
+            kept.append(line)
+        # Collapse multiple blank lines
+        result = re.sub(r'\n{3,}', '\n\n', '\n'.join(kept))
+        return result.strip()
+
+
+def _strip_bullets_only(text: str) -> str:
+    """
+    For replies that didn't call filter_courses: strip markdown tables and
+    bullet lines (- / * / •), keeping prose and numbered options intact.
+    Only applies when the reply contains numbered options (1. ...) — leaves
+    purely-prose replies like GE explanations and FAQs untouched.
+    """
+    import re
+    if not re.search(r'^\d+\.', text, re.MULTILINE):
+        return text  # no numbered options → leave as-is (GE explanation, FAQ, etc.)
+    kept = []
     for line in text.splitlines():
         t = line.strip()
         if not t:
+            kept.append('')
             continue
-        if re.match(r'^\d+\.', t):
-            if followup_action.match(t):
-                numbered.append(line)
-        elif intro is None and not t.startswith('|') and not re.match(r'^[-*•#]', t) and not re.match(r'^---', t):
-            # Strip trailing colon/intro markers like "Here's what's available:"
-            first_sentence = re.split(r':\s*$', t)[0]
-            intro = first_sentence
-    parts = []
-    if intro:
-        parts.append(intro.rstrip('.') + '.')
-    if numbered:
-        parts.extend(numbered)
-    return '\n'.join(parts).strip()
+        if t.startswith('|') or re.match(r'^[-*•]{1,2}\s', t) or re.match(r'^---', t):
+            continue
+        if re.match(r'^\*{2}[^*]+\*{2}$', t):
+            continue
+        kept.append(line)
+    return re.sub(r'\n{3,}', '\n\n', '\n'.join(kept)).strip()
 
 
 _GUARDRAIL_BLOCKED_REPLY = (
@@ -264,6 +312,7 @@ def converse(messages: list[dict]) -> tuple[str, list[dict]]:
     # Accumulate unique courses (deduped by courseCode+teachingCollege) across
     # all filter_courses tool calls in this turn.
     courses_seen: dict[str, dict] = {}
+    filter_was_called = False  # True even if filter returned 0 results
 
     for _ in range(10):  # max 10 tool-use rounds
         converse_kwargs = dict(
@@ -285,8 +334,10 @@ def converse(messages: list[dict]) -> tuple[str, list[dict]]:
             for block in output_message.get("content", []):
                 if "text" in block:
                     text = block["text"]
-                    if courses_seen:
-                        text = _strip_course_prose(text)
+                    if filter_was_called:
+                        text = _strip_course_prose(text, has_courses=bool(courses_seen))
+                    else:
+                        text = _strip_bullets_only(text)
                     return text, list(courses_seen.values())
             return "", list(courses_seen.values())
 
@@ -299,6 +350,7 @@ def converse(messages: list[dict]) -> tuple[str, list[dict]]:
 
                     # Collect courses returned by filter_courses
                     if tool_use["name"] == "filter_courses":
+                        filter_was_called = True
                         try:
                             returned_courses = json.loads(result_content)
                             if isinstance(returned_courses, list):
