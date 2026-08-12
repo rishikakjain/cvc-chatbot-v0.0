@@ -40,7 +40,7 @@ def filter_courses(
     exclude_college: str | None = None,
     start_after: str | None = None,
     has_seats: bool = True,
-    top_n: int = 5,
+    top_n: int = 10,
     source_path: str | Path | None = None,
 ) -> list[dict]:
     """

@@ -1608,6 +1608,37 @@ body {
   height: 13px;
 }
 
+/* ── Show all results button ─────────────────────────────── */
+
+.show-all-btn {
+  width: 100%;
+  padding: 9px 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--cvc-navy);
+  background: transparent;
+  border: 1.5px solid rgba(0,51,102,0.25);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  margin: 2px 0 4px;
+}
+
+.show-all-btn:hover {
+  background: rgba(0,51,102,0.05);
+  border-color: rgba(0,51,102,0.45);
+}
+
+[data-theme="dark"] .show-all-btn {
+  color: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.15);
+}
+
+[data-theme="dark"] .show-all-btn:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.3);
+}
+
 /* ── Input area ──────────────────────────────────────────── */
 
 .chat__input-area {

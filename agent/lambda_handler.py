@@ -50,7 +50,7 @@ def _handle_filter_courses(params: dict) -> list[dict]:
     has_seats_raw = params.get("has_seats", "true")
     has_seats = str(has_seats_raw).lower() not in ("false", "0", "no")
 
-    top_n_raw = params.get("top_n", "5")
+    top_n_raw = params.get("top_n", "10")
     try:
         top_n = int(top_n_raw)
     except (ValueError, TypeError):

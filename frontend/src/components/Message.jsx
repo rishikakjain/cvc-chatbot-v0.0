@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import CourseCard from './CourseCard'
 import { parseMessageContent } from './parseCourses'
@@ -66,7 +66,11 @@ function apiCourseToCourseCard(course, index) {
   }
 }
 
+const INITIAL_VISIBLE = 5
+
 function BotContent({ content, courses, onSaveCourse, savedCourses, onSearchGE }) {
+  const [showAll, setShowAll] = useState(false)
+
   // If the API returned structured course data, use it directly instead of
   // trying to parse markdown. Fall back to parseCourses for older messages
   // that have no courses prop (e.g., session history loaded from DynamoDB).
@@ -93,6 +97,9 @@ function BotContent({ content, courses, onSaveCourse, savedCourses, onSearchGE }
       .join('\n')
       .trim()
 
+    const visibleCourses = showAll ? courses : courses.slice(0, INITIAL_VISIBLE)
+    const hiddenCount = courses.length - INITIAL_VISIBLE
+
     return (
       <div className="bot-content">
         {prose && (
@@ -106,7 +113,7 @@ function BotContent({ content, courses, onSaveCourse, savedCourses, onSearchGE }
             {prose}
           </ReactMarkdown>
         )}
-        {courses.map((c, i) => {
+        {visibleCourses.map((c, i) => {
           const card = apiCourseToCourseCard(c, i + 1)
           const key = `${card.name}|${card.college}`
           const isSaved = savedCourses.some(s => `${s.name}|${s.college}` === key)
@@ -121,6 +128,11 @@ function BotContent({ content, courses, onSaveCourse, savedCourses, onSearchGE }
             />
           )
         })}
+        {!showAll && hiddenCount > 0 && (
+          <button className="show-all-btn" onClick={() => setShowAll(true)}>
+            Show all {courses.length} results
+          </button>
+        )}
         <CourseInfoFooter />
       </div>
     )

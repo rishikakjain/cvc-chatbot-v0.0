@@ -86,8 +86,8 @@ ACTION_GROUP_SCHEMA = {
                                     },
                                     "top_n": {
                                         "type": "integer",
-                                        "description": "Maximum number of results to return (default 5).",
-                                        "default": 5,
+                                        "description": "Maximum number of results to return (default 10).",
+                                        "default": 10,
                                     },
                                 },
                             }
@@ -130,37 +130,6 @@ ACTION_GROUP_SCHEMA = {
                 "responses": {
                     "200": {
                         "description": "GE area explanation",
-                        "content": {
-                            "application/json": {"schema": {"type": "object"}}
-                        },
-                    }
-                },
-            }
-        },
-        "/get_faq_answer": {
-            "post": {
-                "operationId": "get_faq_answer",
-                "summary": "Answer a common question about CVC enrollment, transfer credit, fees, deadlines, or how CVC works",
-                "requestBody": {
-                    "required": True,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": ["topic"],
-                                "properties": {
-                                    "topic": {
-                                        "type": "string",
-                                        "description": "The question or topic (e.g. 'how do I enroll', 'will this count for transfer', 'what are the fees').",
-                                    }
-                                },
-                            }
-                        }
-                    },
-                },
-                "responses": {
-                    "200": {
-                        "description": "FAQ answer",
                         "content": {
                             "application/json": {"schema": {"type": "object"}}
                         },
