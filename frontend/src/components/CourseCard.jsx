@@ -1,11 +1,11 @@
 import React from 'react'
 import { useLang } from '../i18n'
 
-function SeatsGauge({ available, total }) {
+function SeatsGauge({ available, total, t }) {
   if (available == null) return null
   const pct = total > 0 ? Math.round((available / total) * 100) : 0
   const color = pct > 50 ? '#22c55e' : pct > 20 ? '#f59e0b' : '#ef4444'
-  const label = pct > 50 ? 'Good availability' : pct > 20 ? 'Filling up' : 'Almost full'
+  const label = pct > 50 ? t('card_seats_good') : pct > 20 ? t('card_seats_filling') : t('card_seats_full')
   return (
     <div className="cc-seats">
       <div className="cc-seats__bar-wrap">
@@ -14,7 +14,7 @@ function SeatsGauge({ available, total }) {
         </div>
       </div>
       <div className="cc-seats__meta">
-        <span className="cc-seats__count" style={{ color }}>{available}{total ? ` / ${total}` : ''} seats</span>
+        <span className="cc-seats__count" style={{ color }}>{available}{total ? ` / ${total}` : ''} {t('card_seats')}</span>
         <span className="cc-seats__label" style={{ color }}>{label}</span>
       </div>
     </div>
@@ -72,7 +72,7 @@ I can enroll directly at cvc.edu once I have your confirmation. Thank you!`)
 
 export default function CourseCard({ course, index, isSaved, onSave, onSearchGE }) {
   const { t } = useLang()
-  const { name, code, units, college, delivery, startDate, endDate, professor, seatsAvailable, seatsTotal, ge, note } = course
+  const { name, code, units, college, delivery, startDate, endDate, professor, seatsAvailable, seatsTotal, ge, note, isZtc } = course
 
   const deliveryLower = (delivery || '').toLowerCase()
   // Use word-boundary check: "asynchronous" must not match sync chip
@@ -97,10 +97,16 @@ export default function CourseCard({ course, index, isSaved, onSave, onSearchGE 
         {units && <span className="cc__units">{units}<small>u</small></span>}
       </div>
 
-      {/* GE + delivery chips */}
-      {((ge && ge.length > 0) || isAsync || isSync) && (
+      {/* GE + delivery + ZTC chips */}
+      {((ge && ge.length > 0) || isAsync || isSync || isZtc) && (
         <div className="cc__chips">
           {ge && ge.map(tag => <GEChip key={tag} tag={tag} onSearch={onSearchGE} />)}
+          {isZtc && (
+            <span className="cc-chip cc-chip--ztc">
+              <svg className="cc-chip__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              ZTC
+            </span>
+          )}
           {isAsync && (
             <span className="cc-chip cc-chip--async">
               <svg className="cc-chip__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -121,35 +127,35 @@ export default function CourseCard({ course, index, isSaved, onSave, onSearchGE 
         <div className="cc__cell">
           <svg className="cc__cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <div className="cc__cell-body">
-            <span className="cc__cell-label">Starts</span>
+            <span className="cc__cell-label">{t('card_starts')}</span>
             <span className={`cc__cell-val${!startDate ? ' cc__cell-val--empty' : ''}`}>{startDate || '—'}</span>
           </div>
         </div>
         <div className="cc__cell">
           <svg className="cc__cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <div className="cc__cell-body">
-            <span className="cc__cell-label">Ends</span>
+            <span className="cc__cell-label">{t('card_ends')}</span>
             <span className={`cc__cell-val${!endDate ? ' cc__cell-val--empty' : ''}`}>{endDate || '—'}</span>
           </div>
         </div>
         <div className="cc__cell">
           <svg className="cc__cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <div className="cc__cell-body">
-            <span className="cc__cell-label">Instructor</span>
+            <span className="cc__cell-label">{t('card_instructor')}</span>
             <span className={`cc__cell-val${!professor ? ' cc__cell-val--empty' : ''}`}>{professor || '—'}</span>
           </div>
         </div>
         <div className="cc__cell">
           <svg className="cc__cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           <div className="cc__cell-body">
-            <span className="cc__cell-label">Format</span>
+            <span className="cc__cell-label">{t('card_format')}</span>
             <span className={`cc__cell-val${!delivery ? ' cc__cell-val--empty' : ''}`}>{delivery || '—'}</span>
           </div>
         </div>
       </div>
 
       {/* Seats gauge */}
-      <SeatsGauge available={seatsAvailable} total={seatsTotal} />
+      <SeatsGauge available={seatsAvailable} total={seatsTotal} t={t} />
 
       {/* Note */}
       {note && (
@@ -177,14 +183,14 @@ export default function CourseCard({ course, index, isSaved, onSave, onSearchGE 
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
           </svg>
-          Ask Counselor
+          {t('counselor_btn')}
         </a>
 
-        <button className={`save-btn${isSaved ? ' save-btn--saved' : ''}`} onClick={onSave} title={isSaved ? 'Unsave' : 'Save'}>
+        <button className={`save-btn${isSaved ? ' save-btn--saved' : ''}`} onClick={onSave} title={isSaved ? t('saved_btn') : t('save_btn')}>
           <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
           </svg>
-          {isSaved ? 'Saved' : 'Save'}
+          {isSaved ? t('saved_btn') : t('save_btn')}
         </button>
       </div>
     </div>

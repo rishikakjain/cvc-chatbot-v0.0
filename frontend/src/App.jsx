@@ -10,166 +10,245 @@ function CVCLandingPage() {
       {/* Nav */}
       <header className="cvc-nav">
         <div className="cvc-nav__logo">
-          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="36" height="36" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="22" cy="22" r="20" stroke="white" strokeWidth="2" fill="none"/>
             <path d="M22 8 C14 8 8 14 8 22 C8 30 14 36 22 36 C30 36 36 30 36 22" stroke="white" strokeWidth="2" fill="none"/>
-            <path d="M16 22 Q22 14 28 22 Q22 30 16 22Z" fill="white" opacity="0.7"/>
+            <path d="M16 22 Q22 14 28 22 Q22 30 16 22Z" fill="white" opacity="0.85"/>
           </svg>
           <div className="cvc-nav__logo-text">
-            <span className="cvc-nav__logo-ccc">California<br/>Community<br/>Colleges</span>
-            <div className="cvc-nav__logo-divider"/>
-            <span className="cvc-nav__logo-cvc">California<br/>Virtual Campus</span>
+            <span className="cvc-nav__logo-name">California Virtual Campus</span>
+            <span className="cvc-nav__logo-sub">California Community Colleges</span>
           </div>
         </div>
         <nav className="cvc-nav__links">
-          <a href="#">Student Eligibility</a>
+          <a href="#">Eligibility</a>
+          <a href="#">Courses</a>
           <a href="#">Transcripts</a>
           <a href="#">Financial Aid</a>
-          <a href="#">About</a>
           <a href="#">Support</a>
         </nav>
         <div className="cvc-nav__actions">
-          <button className="cvc-btn cvc-btn--login">LOG IN</button>
-          <button className="cvc-btn cvc-btn--educators">Educators Click Here &gt;</button>
+          <button className="cvc-btn cvc-btn--educators">For Educators</button>
+          <button className="cvc-btn cvc-btn--login">Log In</button>
         </div>
       </header>
 
-      {/* Hero banner */}
-      <div className="cvc-hero">
-        <h1 className="cvc-hero__title">Students</h1>
-      </div>
-
-      {/* Content section */}
-      <section className="cvc-content">
-        <div className="cvc-content__left">
-          <h2 className="cvc-content__heading">Check your eligibility</h2>
-          <p className="cvc-content__body">
-            To enroll in a course offered through the CVC, you must currently be enrolled at a California community college that is part of the CVC Exchange.
-          </p>
-          <button className="cvc-btn cvc-btn--check">CHECK YOUR ELIGIBILITY</button>
+      {/* Hero */}
+      <section className="cvc-hero">
+        <div className="cvc-hero__bg-shapes">
+          <div className="cvc-hero__shape cvc-hero__shape--1"/>
+          <div className="cvc-hero__shape cvc-hero__shape--2"/>
+          <div className="cvc-hero__shape cvc-hero__shape--3"/>
         </div>
-        <div className="cvc-content__right">
-          <div className="cvc-content__img-placeholder">
-            <svg viewBox="0 0 480 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="480" height="320" fill="#c8d8e8"/>
-              <ellipse cx="240" cy="280" rx="200" ry="60" fill="#a0bcd0" opacity="0.5"/>
-              {/* Background trees */}
-              <circle cx="360" cy="100" r="70" fill="#5a8a4a" opacity="0.7"/>
-              <circle cx="410" cy="120" r="50" fill="#4a7a3a" opacity="0.6"/>
-              <circle cx="300" cy="90" r="55" fill="#6a9a5a" opacity="0.5"/>
-              {/* Bench/seating area */}
-              <rect x="60" y="200" width="360" height="18" rx="4" fill="#d4c4a8"/>
-              <rect x="80" y="218" width="320" height="30" rx="2" fill="#c4b498"/>
-              {/* Person 1 - woman with laptop */}
-              <ellipse cx="190" cy="165" rx="22" ry="26" fill="#c4956a"/>
-              <rect x="155" y="188" width="70" height="55" rx="6" fill="#6b7c5a"/>
-              {/* Hair */}
-              <path d="M168 165 Q190 130 212 165 Q205 145 190 140 Q175 145 168 165Z" fill="#2a1a0a"/>
-              <path d="M168 165 Q158 185 162 210" stroke="#2a1a0a" strokeWidth="8" fill="none"/>
-              {/* Laptop */}
-              <rect x="162" y="205" width="55" height="35" rx="3" fill="#e0e0e0"/>
-              <rect x="165" y="208" width="49" height="28" rx="2" fill="#4a90d0"/>
-              {/* Person 2 - man in background */}
-              <ellipse cx="310" cy="175" rx="18" ry="20" fill="#8a6545"/>
-              <rect x="288" y="193" width="44" height="45" rx="5" fill="#222"/>
-              {/* Smile lines */}
-              <path d="M304 178 Q310 183 316 178" stroke="#7a4a25" strokeWidth="1.5" fill="none"/>
-            </svg>
+        <div className="cvc-hero__content">
+          <div className="cvc-hero__badge">California Community Colleges</div>
+          <h1 className="cvc-hero__title">
+            Take online courses.<br/>
+            Transfer your credits.
+          </h1>
+          <p className="cvc-hero__subtitle">
+            Access thousands of online courses from over 115 California Community Colleges — all in one place, fully transferable.
+          </p>
+          <div className="cvc-hero__ctas">
+            <button className="cvc-btn cvc-btn--primary">Check Eligibility</button>
+            <button className="cvc-btn cvc-btn--ghost">Browse Courses →</button>
+          </div>
+        </div>
+        <div className="cvc-hero__visual">
+          <div className="cvc-hero__stats">
+            <div className="cvc-hero__stat">
+              <span className="cvc-hero__stat-num">115+</span>
+              <span className="cvc-hero__stat-label">Colleges</span>
+            </div>
+            <div className="cvc-hero__stat-divider"/>
+            <div className="cvc-hero__stat">
+              <span className="cvc-hero__stat-num">2M+</span>
+              <span className="cvc-hero__stat-label">Students Served</span>
+            </div>
+            <div className="cvc-hero__stat-divider"/>
+            <div className="cvc-hero__stat">
+              <span className="cvc-hero__stat-num">100%</span>
+              <span className="cvc-hero__stat-label">Online</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Second content row */}
-      <section className="cvc-content cvc-content--alt">
-        <div className="cvc-content__left">
-          <h2 className="cvc-content__heading">Find courses that fit your goals</h2>
-          <p className="cvc-content__body">
-            Browse thousands of online courses from California Community Colleges. Filter by GE area, delivery method, start date, and more.
-          </p>
-          <button className="cvc-btn cvc-btn--check">SEARCH COURSES</button>
-        </div>
-        <div className="cvc-content__left" style={{paddingLeft: '40px'}}>
-          <h2 className="cvc-content__heading">How CVC works</h2>
-          <ol className="cvc-how-list">
-            <li>Check your eligibility at your home college</li>
-            <li>Find a course that meets your requirements</li>
-            <li>Enroll with one click through CVC</li>
-            <li>Complete the course — credit transfers automatically</li>
-          </ol>
+      {/* How it works */}
+      <section className="cvc-steps">
+        <div className="cvc-steps__inner">
+          <div className="cvc-section-label">How it works</div>
+          <h2 className="cvc-section-title">Enroll in four simple steps</h2>
+          <div className="cvc-steps__grid">
+            {[
+              { n: '01', title: 'Check eligibility', body: "Confirm you're enrolled at a CVC Exchange member college." },
+              { n: '02', title: 'Find your course', body: 'Search by GE requirement, subject, delivery method, or start date.' },
+              { n: '03', title: 'Enroll instantly', body: 'Register through CVC with a single click — no separate application.' },
+              { n: '04', title: 'Earn your credit', body: 'Complete the course and credit transfers automatically to your home college.' },
+            ].map(s => (
+              <div key={s.n} className="cvc-step">
+                <div className="cvc-step__num">{s.n}</div>
+                <h3 className="cvc-step__title">{s.title}</h3>
+                <p className="cvc-step__body">{s.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+
+      {/* Features */}
+      <section className="cvc-features">
+        <div className="cvc-features__inner">
+          <div className="cvc-section-label">Why CVC</div>
+          <h2 className="cvc-section-title">Everything you need to transfer</h2>
+          <div className="cvc-features__grid">
+            {[
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                  </svg>
+                ),
+                title: 'GE credit guaranteed',
+                body: 'Every course is pre-approved for CSU, UC, or Cal-GETC credit — no guesswork.',
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                ),
+                title: 'Flexible scheduling',
+                body: 'Hundreds of async courses with no set meeting times — study on your schedule.',
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                ),
+                title: 'Free for eligible students',
+                body: 'California residents enrolled at a member college pay no additional fees.',
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                ),
+                title: 'AI-powered advising',
+                body: 'Our AI advisor helps you find the right course for your transfer pathway in seconds.',
+              },
+            ].map(f => (
+              <div key={f.title} className="cvc-feature">
+                <div className="cvc-feature__icon">{f.icon}</div>
+                <h3 className="cvc-feature__title">{f.title}</h3>
+                <p className="cvc-feature__body">{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA banner */}
+      <section className="cvc-cta">
+        <div className="cvc-cta__inner">
+          <h2 className="cvc-cta__title">Ready to find your next course?</h2>
+          <p className="cvc-cta__sub">Talk to Cali, our AI advisor — it takes 30 seconds.</p>
+          <button className="cvc-btn cvc-btn--primary cvc-btn--lg">Get Started Free</button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="cvc-footer">
+        <div className="cvc-footer__inner">
+          <div className="cvc-footer__brand">
+            <svg width="28" height="28" viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="20" stroke="rgba(255,255,255,0.5)" strokeWidth="2" fill="none"/>
+              <path d="M22 8 C14 8 8 14 8 22 C8 30 14 36 22 36 C30 36 36 30 36 22" stroke="rgba(255,255,255,0.5)" strokeWidth="2" fill="none"/>
+              <path d="M16 22 Q22 14 28 22 Q22 30 16 22Z" fill="white" opacity="0.6"/>
+            </svg>
+            <span>California Virtual Campus · California Community Colleges</span>
+          </div>
+          <div className="cvc-footer__links">
+            <a href="#">Privacy</a>
+            <a href="#">Accessibility</a>
+            <a href="#">Contact</a>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
 
 // Branching onboarding tree.
-// Each node: { id, question, options: [{ label, value, next }] }
-// next: node id string, 'done', or an 'exit_*' key handled in handleOnboardingAnswer
+// Each node: { id, questionKey, options: [{ labelKey, value, next }] }
+// All text is looked up via t(key) at render time so it respects the active language.
 const ONBOARDING = {
   student_type: {
     id: 'student_type',
-    question: "Hi! To find the right courses for you — what best describes you?",
+    questionKey: 'ob_student_type_q',
     options: [
-      { label: "CC student looking for courses at another CC", value: 'cc', next: 'visa_status' },
-      { label: "UC or CSU student taking CC courses for credit", value: 'ucscu', next: 'visa_status_ucscu' },
-      { label: "Just exploring", value: 'other', next: 'exit_other' },
+      { labelKey: 'ob_student_type_cc', value: 'cc', next: 'visa_status' },
+      { labelKey: 'ob_student_type_ucscu', value: 'ucscu', next: 'visa_status_ucscu' },
+      { labelKey: 'ob_student_type_other', value: 'other', next: 'exit_other' },
     ],
   },
   visa_status: {
     id: 'visa_status',
-    question: "Are you on an F-1 international student visa?",
+    questionKey: 'ob_visa_q',
     options: [
-      { label: "No — I'm domestic", value: 'domestic', next: 'age_check' },
-      { label: "Yes — F-1 visa", value: 'f1', next: 'exit_f1' },
+      { labelKey: 'ob_visa_domestic', value: 'domestic', next: 'age_check' },
+      { labelKey: 'ob_visa_f1', value: 'f1', next: 'exit_f1' },
     ],
   },
   visa_status_ucscu: {
     id: 'visa_status_ucscu',
-    question: "Are you on an F-1 international student visa?",
+    questionKey: 'ob_visa_q',
     options: [
-      { label: "No — I'm domestic", value: 'domestic', next: 'ucscu_type' },
-      { label: "Yes — F-1 visa", value: 'f1', next: 'exit_f1' },
+      { labelKey: 'ob_visa_domestic', value: 'domestic', next: 'ucscu_type' },
+      { labelKey: 'ob_visa_f1', value: 'f1', next: 'exit_f1' },
     ],
   },
   age_check: {
     id: 'age_check',
-    question: "CVC requires students to be at least 18 years old. Are you 18 or older?",
+    questionKey: 'ob_age_q',
     options: [
-      { label: "Yes — I'm 18 or older", value: 'yes', next: 'gpa_check' },
-      { label: "No — I'm under 18", value: 'no', next: 'exit_underage' },
+      { labelKey: 'ob_age_yes', value: 'yes', next: 'gpa_check' },
+      { labelKey: 'ob_age_no', value: 'no', next: 'exit_underage' },
     ],
   },
   gpa_check: {
     id: 'gpa_check',
-    question: "Do you have a GPA of 2.0 or higher at your home college? (If this is your first term or you haven't completed a course yet, that's fine too.)",
+    questionKey: 'ob_gpa_q',
     options: [
-      { label: "Yes — 2.0 GPA or higher", value: 'yes', next: 'transfer_goal' },
-      { label: "It's my first term / no GPA yet", value: 'first_term', next: 'transfer_goal' },
-      { label: "No — my GPA is below 2.0", value: 'no', next: 'exit_gpa' },
+      { labelKey: 'ob_gpa_yes', value: 'yes', next: 'transfer_goal' },
+      { labelKey: 'ob_gpa_first', value: 'first_term', next: 'transfer_goal' },
+      { labelKey: 'ob_gpa_no', value: 'no', next: 'exit_gpa' },
     ],
   },
   transfer_goal: {
     id: 'transfer_goal',
-    question: "Are you planning to transfer to a CSU or UC? This helps me recommend the right GE framework.",
+    questionKey: 'ob_transfer_q',
     options: [
-      { label: "CSU (Cal State)", value: 'csu', next: 'home_college' },
-      { label: "UC (University of California)", value: 'uc', next: 'home_college' },
-      { label: "Both / Not sure yet", value: 'unsure', next: 'home_college' },
+      { labelKey: 'ob_transfer_csu', value: 'csu', next: 'home_college' },
+      { labelKey: 'ob_transfer_uc', value: 'uc', next: 'home_college' },
+      { labelKey: 'ob_transfer_unsure', value: 'unsure', next: 'home_college' },
     ],
   },
   ucscu_type: {
     id: 'ucscu_type',
-    question: "Which type of school are you currently at?",
+    questionKey: 'ob_ucscu_type_q',
     options: [
-      { label: "CSU (Cal State)", value: 'csu', next: 'home_college' },
-      { label: "UC (University of California)", value: 'uc', next: 'home_college' },
+      { labelKey: 'ob_transfer_csu', value: 'csu', next: 'home_college' },
+      { labelKey: 'ob_transfer_uc', value: 'uc', next: 'home_college' },
     ],
   },
   home_college: {
     id: 'home_college',
-    question: "What is your home college? (Type the name — this helps us exclude it from search results.)",
+    questionKey: 'ob_home_q',
     type: 'text_input',
-    placeholder: 'e.g. Victor Valley College',
+    placeholderKey: 'ob_home_placeholder',
     next: 'done',
   },
 }
@@ -219,27 +298,27 @@ function clearProfile() {
   localStorage.removeItem(PROFILE_KEY)
 }
 
-function profileSummary(answers) {
+function profileSummary(answers, t) {
   if (!answers) return []
   const rows = []
-  const typeMap = { cc: 'CC student (transfer)', ucscu: 'UC / CSU student', other: 'Exploring' }
-  if (answers.student_type) rows.push({ label: 'Student type', value: typeMap[answers.student_type] || answers.student_type })
+  const typeMap = { cc: t('profile_type_cc'), ucscu: t('profile_type_ucscu'), other: t('profile_type_other') }
+  if (answers.student_type) rows.push({ label: t('profile_student_type'), value: typeMap[answers.student_type] || answers.student_type })
   const visaVal = answers.visa_status || answers.visa_status_ucscu
-  if (visaVal) rows.push({ label: 'Visa status', value: visaVal === 'f1' ? 'F-1 international' : 'Domestic' })
-  if (answers.age_check) rows.push({ label: 'Age 18+', value: answers.age_check === 'yes' ? 'Yes' : 'No' })
+  if (visaVal) rows.push({ label: t('profile_visa'), value: visaVal === 'f1' ? t('profile_visa_f1') : t('profile_visa_domestic') })
+  if (answers.age_check) rows.push({ label: t('profile_age'), value: answers.age_check === 'yes' ? 'Yes' : 'No' })
   if (answers.gpa_check) {
     const gpaMap = { yes: '2.0+', first_term: 'First term', no: 'Below 2.0' }
-    rows.push({ label: 'GPA', value: gpaMap[answers.gpa_check] || answers.gpa_check })
+    rows.push({ label: t('profile_gpa'), value: gpaMap[answers.gpa_check] || answers.gpa_check })
   }
   if (answers.transfer_goal) {
-    const goalMap = { csu: 'Transferring to CSU', uc: 'Transferring to UC', unsure: 'CSU or UC (undecided)' }
-    rows.push({ label: 'Transfer goal', value: goalMap[answers.transfer_goal] || answers.transfer_goal })
+    const goalMap = { csu: t('profile_goal_csu'), uc: t('profile_goal_uc'), unsure: t('profile_goal_unsure') }
+    rows.push({ label: t('profile_transfer_goal'), value: goalMap[answers.transfer_goal] || answers.transfer_goal })
   }
   if (answers.ucscu_type) {
     const typeMap2 = { csu: 'CSU', uc: 'UC' }
-    rows.push({ label: 'Current school', value: typeMap2[answers.ucscu_type] || answers.ucscu_type })
+    rows.push({ label: t('profile_current_school'), value: typeMap2[answers.ucscu_type] || answers.ucscu_type })
   }
-  if (answers.home_college) rows.push({ label: 'Home college', value: answers.home_college })
+  if (answers.home_college) rows.push({ label: t('profile_home_college'), value: answers.home_college })
   return rows
 }
 
@@ -247,7 +326,7 @@ function makeInitialMessages(hasProfile) {
   if (hasProfile) return [{ role: 'assistant', content: null, isWelcome: true }]
   return [
     { role: 'assistant', content: null, isWelcome: true },
-    { role: 'assistant', content: ONBOARDING[FIRST_STEP].question, isOnboarding: true, stepId: FIRST_STEP },
+    { role: 'assistant', content: null, isOnboarding: true, stepId: FIRST_STEP },
   ]
 }
 
@@ -342,12 +421,13 @@ export default function App() {
     const step = ONBOARDING[stepId]
     const newAnswers = { ...onboarding.answers, [step.id]: option.value }
 
-    setMessages(prev => [...prev, { role: 'user', content: option.label }])
+    setMessages(prev => [...prev, { role: 'user', content: t(option.labelKey) }])
 
     if (option.next === 'exit_other') {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: "No problem! CVC Exchange is open to California Community College students, but I can still walk you through what courses are available and how the system works. Feel free to ask anything.",
+        content: null,
+        contentKey: 'ob_exit_other',
         isOnboarding: true,
       }])
       setOnboarding({ stepId, done: true, answers: newAnswers })
@@ -358,7 +438,8 @@ export default function App() {
     if (option.next === 'exit_f1') {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: "Unfortunately, F-1 international students are not eligible to enroll through the CVC Exchange — enrolling at a second institution without prior approval could put your visa status at risk. You'd need to apply directly to each college via CCCApply. I can still help you understand available courses and general requirements. What would you like to know?",
+        content: null,
+        contentKey: 'ob_exit_f1',
         isOnboarding: true,
       }])
       setOnboarding({ stepId, done: true, answers: newAnswers })
@@ -369,7 +450,8 @@ export default function App() {
     if (option.next === 'exit_underage') {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: "CVC Exchange requires students to be at least 18 years old. Dual-enrolled high school students are not eligible for the Exchange — you'd need to apply directly to each college via CCCApply. Once you turn 18 and are enrolled at a CCC, come back and I can help you find courses!",
+        content: null,
+        contentKey: 'ob_exit_underage',
         isOnboarding: true,
       }])
       setOnboarding({ stepId, done: true, answers: newAnswers })
@@ -380,7 +462,8 @@ export default function App() {
     if (option.next === 'exit_gpa') {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: "CVC Exchange requires a GPA of 2.0 or higher to enroll. If your GPA is below 2.0, you'll need to raise it at your home college before using CVC. Your academic counselor can help you make a plan. I can still show you what courses exist so you know what to aim for — want to explore?",
+        content: null,
+        contentKey: 'ob_exit_gpa',
         isOnboarding: true,
       }])
       setOnboarding({ stepId, done: true, answers: newAnswers })
@@ -412,7 +495,7 @@ export default function App() {
     if (nextStep) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: nextStep.question,
+        content: null,
         isOnboarding: true,
         stepId: nextStep.id,
       }])
@@ -569,7 +652,7 @@ export default function App() {
         {/* Header */}
         <header className="header">
           <div className="header__left">
-            <div className="header__avatar">A</div>
+            <div className="header__avatar">🌴</div>
             <div className="header__info">
               <span className="header__name">{t('advisor_name')}</span>
               <span className="header__status">
@@ -593,10 +676,10 @@ export default function App() {
               </button>
               {profilePopover && (
                 <div className="profile-popover">
-                  <div className="profile-popover__title">Your Profile</div>
-                  {onboarding.done && profileSummary(onboarding.answers).length > 0 ? (
+                  <div className="profile-popover__title">{t('profile_title')}</div>
+                  {onboarding.done && profileSummary(onboarding.answers, t).length > 0 ? (
                     <ul className="profile-popover__list">
-                      {profileSummary(onboarding.answers).map(row => (
+                      {profileSummary(onboarding.answers, t).map(row => (
                         <li key={row.label} className="profile-popover__row">
                           <span className="profile-popover__label">{row.label}</span>
                           <span className="profile-popover__value">{row.value}</span>
@@ -604,10 +687,10 @@ export default function App() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="profile-popover__empty">No profile saved yet.</p>
+                    <p className="profile-popover__empty">{t('profile_empty')}</p>
                   )}
                   <button className="profile-popover__reset" onClick={handleResetProfile}>
-                    Reset profile & start over
+                    {t('profile_reset')}
                   </button>
                 </div>
               )}
@@ -756,7 +839,7 @@ export default function App() {
                 <React.Fragment key={i}>
                   <Message
                     role={msg.role}
-                    content={msg.isWelcome ? t('welcome') : msg.content}
+                    content={msg.isWelcome ? t('welcome') : msg.contentKey ? t(msg.contentKey) : msg.stepId && msg.isOnboarding ? t(ONBOARDING[msg.stepId]?.questionKey) : msg.content}
                     courses={msg.courses}
                     isChipSearch={msg.isChipSearch}
                     onSaveCourse={handleSaveCourse}
@@ -771,7 +854,7 @@ export default function App() {
                       <input
                         className="quick-reply-input"
                         type="text"
-                        placeholder={stepForMsg.placeholder || 'Type your answer…'}
+                        placeholder={t(stepForMsg.placeholderKey) || 'Type your answer…'}
                         value={onboardingTextInput}
                         onChange={e => setOnboardingTextInput(e.target.value)}
                         disabled={loading}
@@ -782,7 +865,7 @@ export default function App() {
                         className="quick-reply-btn quick-reply-btn--submit"
                         disabled={loading || !onboardingTextInput.trim()}
                       >
-                        Continue →
+                        {t('ob_continue')}
                       </button>
                     </form>
                   ) : stepForMsg ? (
@@ -794,7 +877,7 @@ export default function App() {
                           onClick={() => handleOnboardingAnswer(msg.stepId, opt)}
                           disabled={loading}
                         >
-                          {opt.label}
+                          {t(opt.labelKey)}
                         </button>
                       ))}
                     </div>

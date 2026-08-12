@@ -101,6 +101,10 @@ TOOL_CONFIG = {
                                 "type": "boolean",
                                 "description": "Only return courses with available seats (default true).",
                             },
+                            "ztc": {
+                                "type": "boolean",
+                                "description": "If true, only return Zero Textbook Cost (ZTC) courses. Only set when student explicitly asks for free-textbook or ZTC courses.",
+                            },
                             "top_n": {
                                 "type": "integer",
                                 "description": "Max results to return (default 5).",
@@ -159,6 +163,9 @@ def _run_tool(name: str, tool_input: dict) -> str:
         has_seats = tool_input.get("has_seats", True)
         if isinstance(has_seats, str):
             has_seats = has_seats.lower() not in ("false", "0", "no")
+        ztc = tool_input.get("ztc", False)
+        if isinstance(ztc, str):
+            ztc = ztc.lower() in ("true", "1", "yes")
         top_n = int(tool_input.get("top_n", 5))
         courses = filter_courses(
             ge_areas=ge_areas,
@@ -167,6 +174,7 @@ def _run_tool(name: str, tool_input: dict) -> str:
             exclude_college=tool_input.get("exclude_college"),
             start_after=tool_input.get("start_after"),
             has_seats=has_seats,
+            ztc=ztc,
             top_n=top_n,
         )
         return json.dumps([summarize_course(c) for c in courses])
@@ -482,41 +490,61 @@ def _response(status: int, body: dict) -> dict:
 
 
 def _setup_guardrail() -> dict:
-    """Create or find the cvc-scope-guard guardrail using Lambda's own credentials."""
+    """Create (or update) the cvc-scope-guard guardrail using Lambda's own credentials."""
     bedrock_cp = boto3.client("bedrock", region_name=REGION)
     guardrail_name = "cvc-scope-guard"
-    # Check if it already exists
+
+    blocked_msg = (
+        "I'm only able to help with CVC course advising — "
+        "finding online courses, explaining GE requirements, or answering enrollment questions. "
+        "Try asking me to search for a course or explain an area like CSU B2!"
+    )
+
+    topic_policy = {
+        "topicsConfig": [
+            {
+                "name": "off_topic",
+                "definition": (
+                    "Any request not about CVC course search, GE requirements, or California "
+                    "Community College enrollment. Includes math, trivia, writing, personal "
+                    "advice, jokes, and general facts."
+                ),
+                "examples": [
+                    "What is 7 times 8?",
+                    "Write a poem for me.",
+                    "What is the capital of France?",
+                    "Help me write my essay.",
+                    "I feel anxious, what should I do?",
+                ],
+                "type": "DENY",
+            },
+        ]
+    }
+
+    # Check if already exists — update it, otherwise create
     try:
         existing = bedrock_cp.list_guardrails()
         for g in existing.get("guardrails", []):
             if g["name"] == guardrail_name:
-                return {"guardrailId": g["id"], "created": False}
+                gid = g["id"]
+                bedrock_cp.update_guardrail(
+                    guardrailIdentifier=gid,
+                    name=guardrail_name,
+                    description="Restricts CVC chatbot to course advising topics only",
+                    topicPolicyConfig=topic_policy,
+                    blockedInputMessaging=blocked_msg,
+                    blockedOutputsMessaging=blocked_msg,
+                )
+                return {"guardrailId": gid, "created": False, "updated": True}
     except Exception:
         pass
-    # Create it
+
     resp = bedrock_cp.create_guardrail(
         name=guardrail_name,
         description="Restricts CVC chatbot to course advising topics only",
-        topicPolicyConfig={
-            "topicsConfig": [{
-                "name": "off_topic",
-                "definition": "Requests completely unrelated to courses, college enrollment, or academic advising. Includes creative writing, poems, general trivia, cooking, weather.",
-                "examples": [
-                    "Write me an essay about climate change",
-                    "What is the capital of France?",
-                    "Write a poem about flowers",
-                ],
-                "type": "DENY",
-            }]
-        },
-        blockedInputMessaging=(
-            "I can only help with CVC course advising — "
-            "try asking me to find a course or explain a GE requirement!"
-        ),
-        blockedOutputsMessaging=(
-            "I can only help with CVC course advising — "
-            "try asking me to find a course or explain a GE requirement!"
-        ),
+        topicPolicyConfig=topic_policy,
+        blockedInputMessaging=blocked_msg,
+        blockedOutputsMessaging=blocked_msg,
     )
     return {"guardrailId": resp["guardrailId"], "guardrailArn": resp["guardrailArn"], "created": True}
 

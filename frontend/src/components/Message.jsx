@@ -63,6 +63,7 @@ function apiCourseToCourseCard(course, index) {
     ge: Array.isArray(course.geChips) ? course.geChips : [],
     seatsAvailable,
     seatsTotal,
+    isZtc: !!course.isZtc,
   }
 }
 
@@ -215,7 +216,9 @@ export default function Message({ role, content, courses, isTyping, isChipSearch
 
   return (
     <div className={`message ${isBot ? 'message--bot' : 'message--user'}`}>
-      {isBot && <div className="message__avatar" aria-hidden="true">A</div>}
+      {isBot && (
+        <div className="message__avatar" aria-hidden="true">🌴</div>
+      )}
       <div className="message__bubble">
         {isTyping ? (
           <span className="message__typing">

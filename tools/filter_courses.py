@@ -40,6 +40,7 @@ def filter_courses(
     exclude_college: str | None = None,
     start_after: str | None = None,
     has_seats: bool = True,
+    ztc: bool = False,
     top_n: int = 10,
     source_path: str | Path | None = None,
 ) -> list[dict]:
@@ -125,6 +126,15 @@ def filter_courses(
             if not any(code.upper() in course_areas_upper for code in ge_areas):
                 continue
 
+        # ZTC filter — badge field or courseNotes mentioning ZTC
+        if ztc:
+            badges = course.get("badges") or []
+            notes = str(course.get("courseNotes") or "").lower()
+            has_ztc_badge = any("zero textbook" in str(b).lower() for b in badges)
+            has_ztc_note = "zero textbook" in notes or " ztc" in notes or notes.startswith("ztc")
+            if not has_ztc_badge and not has_ztc_note:
+                continue
+
         # Subject keyword filter — matches against course name
         if keyword:
             name = (course.get("courseName") or "").lower()
@@ -188,6 +198,15 @@ def summarize_course(course: dict) -> dict:
     if units is not None:
         units = units if units > 0 else None  # treat 0-unit courses as unknown
 
+    badges = course.get("badges") or []
+    notes_lower = str(course.get("courseNotes") or "").lower()
+    is_ztc = (
+        any("zero textbook" in str(b).lower() for b in badges)
+        or "zero textbook" in notes_lower
+        or " ztc" in notes_lower
+        or notes_lower.startswith("ztc")
+    )
+
     return {
         "courseCode": course.get("courseCode"),
         "courseName": _normalize_name(course.get("courseName")),
@@ -198,7 +217,8 @@ def summarize_course(course: dict) -> dict:
         "endDate": course.get("endDate"),
         "availableSeats": seats_str,
         "professors": course.get("professors"),
-        "badges": course.get("badges") or [],
+        "badges": badges,
+        "isZtc": is_ztc,
         "geChips": ge_chips,
-        "courseNotes": course.get("courseNotes"),
+        "courseNotes": _normalize_name(course.get("courseNotes")),
     }
