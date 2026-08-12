@@ -289,3 +289,86 @@ tests:
         value: "The reply must describe what was found in general terms (e.g. 'Here are some history courses'). It must NOT list specific course names, codes, or professors in the text — those appear on the cards."
         metric: no-course-details-in-text
         threshold: 0.8
+
+  # ── Multilingual queries — agent must respond helpfully in any language ────
+  # The agent understands non-English input even though UI strings are
+  # translated client-side. These verify the Bedrock model doesn't refuse,
+  # hallucinate, or break format when the student writes in their language.
+
+  - description: "Spanish — math course search"
+    vars:
+      message: "muéstrame cursos de matemáticas disponibles"
+      session_id: "eval-es-math-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).reply.length > 0"
+        metric: non-empty
+      - type: llm-rubric
+        value: "The reply should be helpful and related to CVC course search. It is acceptable (and preferred) to respond in Spanish. It must not refuse or say it only speaks English."
+        metric: multilingual-helpful
+        threshold: 0.8
+
+  - description: "Spanish — enrollment FAQ"
+    vars:
+      message: "¿cómo me inscribo en un curso de CVC?"
+      session_id: "eval-es-faq-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should answer the enrollment question helpfully, mentioning cvc.edu. Acceptable in Spanish or English. Must not refuse to help."
+        metric: multilingual-faq
+        threshold: 0.8
+
+  - description: "Vietnamese — biology course search"
+    vars:
+      message: "tôi cần tìm khóa học sinh học để chuyển trường"
+      session_id: "eval-vi-bio-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).reply.length > 0"
+        metric: non-empty
+      - type: llm-rubric
+        value: "The reply should help the student find biology courses for transfer. Acceptable in Vietnamese or English. Must not refuse or say it cannot understand."
+        metric: multilingual-helpful
+        threshold: 0.8
+
+  - description: "Chinese (Simplified) — transfer credit question"
+    vars:
+      message: "这门课程能算作我的转学学分吗？"
+      session_id: "eval-zh-transfer-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should give a hedged answer about transfer credit (cannot guarantee, check assist.org or counselor). Acceptable in Chinese or English. Must not say the course 'will count' without qualification."
+        metric: transfer-guardrail-multilingual
+        threshold: 0.8
+
+  - description: "Tagalog — async course search"
+    vars:
+      message: "magpakita ng mga asynchronous na kurso para sa transfer"
+      session_id: "eval-tl-async-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).reply.length > 0"
+        metric: non-empty
+      - type: llm-rubric
+        value: "Should respond helpfully about async courses for transfer. Acceptable in Tagalog or English. Must not refuse."
+        metric: multilingual-helpful
+        threshold: 0.8
+
+  - description: "Mixed language — Spanish + English code-switching"
+    vars:
+      message: "quiero tomar un curso de IGETC area 5B, what's available?"
+      session_id: "eval-mixed-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).reply.length > 0"
+        metric: non-empty
+      - type: llm-rubric
+        value: "Should understand the mixed Spanish/English query, explain or search IGETC area 5B (Life Science/Biology). Must handle code-switching gracefully."
+        metric: codeswitching-handled
+        threshold: 0.8
