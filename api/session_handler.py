@@ -292,8 +292,10 @@ def _check_guardrail(text: str) -> bool:
             content=[{"text": {"text": text}}],
         )
         return resp.get("action") == "GUARDRAIL_INTERVENED"
-    except Exception:
-        return False
+    except Exception as e:
+        # Log so CloudWatch shows the real error; fail closed to block the request
+        print(f"[guardrail] apply_guardrail failed (GUARDRAIL_ID={GUARDRAIL_ID}): {e}")
+        return True
 
 
 def converse(messages: list[dict]) -> tuple[str, list[dict]]:
@@ -505,16 +507,16 @@ def _setup_guardrail() -> dict:
             {
                 "name": "off_topic",
                 "definition": (
-                    "Any request not about CVC course search, GE requirements, or California "
-                    "Community College enrollment. Includes math, trivia, writing, personal "
-                    "advice, jokes, and general facts."
+                    "Any request unrelated to CVC courses, GE requirements, or "
+                    "CC enrollment. Includes trivia, creative writing, coding, "
+                    "and personal advice."
                 ),
                 "examples": [
                     "What is 7 times 8?",
-                    "Write a poem for me.",
                     "What is the capital of France?",
-                    "Help me write my essay.",
-                    "I feel anxious, what should I do?",
+                    "Help me write a cover letter.",
+                    "Debug my Python code.",
+                    "Tell me a joke.",
                 ],
                 "type": "DENY",
             },
@@ -522,22 +524,19 @@ def _setup_guardrail() -> dict:
     }
 
     # Check if already exists — update it, otherwise create
-    try:
-        existing = bedrock_cp.list_guardrails()
-        for g in existing.get("guardrails", []):
-            if g["name"] == guardrail_name:
-                gid = g["id"]
-                bedrock_cp.update_guardrail(
-                    guardrailIdentifier=gid,
-                    name=guardrail_name,
-                    description="Restricts CVC chatbot to course advising topics only",
-                    topicPolicyConfig=topic_policy,
-                    blockedInputMessaging=blocked_msg,
-                    blockedOutputsMessaging=blocked_msg,
-                )
-                return {"guardrailId": gid, "created": False, "updated": True}
-    except Exception:
-        pass
+    existing = bedrock_cp.list_guardrails()
+    for g in existing.get("guardrails", []):
+        if g["name"] == guardrail_name:
+            gid = g["id"]
+            bedrock_cp.update_guardrail(
+                guardrailIdentifier=gid,
+                name=guardrail_name,
+                description="Restricts CVC chatbot to course advising topics only",
+                topicPolicyConfig=topic_policy,
+                blockedInputMessaging=blocked_msg,
+                blockedOutputsMessaging=blocked_msg,
+            )
+            return {"guardrailId": gid, "created": False, "updated": True}
 
     resp = bedrock_cp.create_guardrail(
         name=guardrail_name,
