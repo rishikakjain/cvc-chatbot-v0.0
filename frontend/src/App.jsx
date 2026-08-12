@@ -176,6 +176,18 @@ const ONBOARDING = {
 
 const FIRST_STEP = 'student_type'
 
+const LANG_INSTRUCTION = {
+  es: '[Respond entirely in Spanish / Responde completamente en español]',
+  vi: '[Respond entirely in Vietnamese / Trả lời hoàn toàn bằng tiếng Việt]',
+  zh: '[Respond entirely in Chinese (Simplified) / 请用简体中文回复]',
+  tl: '[Respond entirely in Tagalog / Sagutin nang buo sa Tagalog]',
+}
+
+function withLang(text, lang) {
+  const hint = LANG_INSTRUCTION[lang]
+  return hint ? `${hint}\n${text}` : text
+}
+
 function buildProfileMessage(answers) {
   const type = answers.student_type
   const goal = answers.transfer_goal
@@ -275,7 +287,7 @@ export default function App() {
     if (profile) {
       const contextMsg = buildProfileMessage(profile)
       setLoading(true)
-      sendMessage(contextMsg)
+      sendMessage(withLang(contextMsg, lang))
         .then(data => {
           setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
           if (data.home_college) setHomeCollege(data.home_college)
@@ -302,7 +314,7 @@ export default function App() {
       setMessages(prev => [...prev, { role: 'user', content: contextMsg, isHidden: true }])
       setLoading(true)
       try {
-        const data = await sendMessage(contextMsg)
+        const data = await sendMessage(withLang(contextMsg, lang))
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
         if (data.home_college) setHomeCollege(data.home_college)
       } catch {
@@ -383,7 +395,7 @@ export default function App() {
       setMessages(prev => [...prev, { role: 'user', content: contextMsg, isHidden: true }])
       setLoading(true)
       try {
-        const data = await sendMessage(contextMsg)
+        const data = await sendMessage(withLang(contextMsg, lang))
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
         if (data.home_college) setHomeCollege(data.home_college)
       } catch (err) {
@@ -448,7 +460,7 @@ export default function App() {
     if (!savedAnswers) return
     const contextMsg = buildProfileMessage(savedAnswers)
     setLoading(true)
-    sendMessage(contextMsg)
+    sendMessage(withLang(contextMsg, lang))
       .then(data => {
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
         if (data.home_college) setHomeCollege(data.home_college)
@@ -500,7 +512,7 @@ export default function App() {
     setLoading(true)
 
     try {
-      const data = await sendMessage(text)
+      const data = await sendMessage(withLang(text, lang))
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
       if (data.home_college) setHomeCollege(data.home_college)
     } catch (err) {
@@ -525,7 +537,7 @@ export default function App() {
     setMessages(prev => [...prev, { role: 'user', content: geTag, isChipSearch: true }])
     setLoading(true)
     try {
-      const data = await sendMessage(text)
+      const data = await sendMessage(withLang(text, lang))
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply, courses: data.courses || [] }])
       if (data.home_college) setHomeCollege(data.home_college)
     } catch (err) {
