@@ -521,7 +521,8 @@ export default function App() {
     if (loading) return
     const exclusion = homeCollege ? `, excluding ${homeCollege}` : ''
     const text = `Show me all available courses that satisfy ${geTag}${exclusion}`
-    setMessages(prev => [...prev, { role: 'user', content: text }])
+    // Push a silent chip-search bubble instead of a full user message
+    setMessages(prev => [...prev, { role: 'user', content: geTag, isChipSearch: true }])
     setLoading(true)
     try {
       const data = await sendMessage(text)
@@ -745,6 +746,7 @@ export default function App() {
                     role={msg.role}
                     content={msg.isWelcome ? t('welcome') : msg.content}
                     courses={msg.courses}
+                    isChipSearch={msg.isChipSearch}
                     onSaveCourse={handleSaveCourse}
                     savedCourses={savedCourses}
                     onSearchGE={handleSearchGE}

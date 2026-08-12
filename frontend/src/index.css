@@ -1608,6 +1608,37 @@ body {
   height: 13px;
 }
 
+/* ── Chip-search pill (silent GE chip click indicator) ───── */
+
+.message--chip-search {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.chip-search-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 99px;
+}
+
+.chip-search-pill svg {
+  width: 11px;
+  height: 11px;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .chip-search-pill {
+  background: rgba(255,255,255,0.04);
+  border-color: #252d4a;
+}
+
 /* ── Show all results button ─────────────────────────────── */
 
 .show-all-btn {
