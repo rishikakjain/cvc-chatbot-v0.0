@@ -290,85 +290,281 @@ tests:
         metric: no-course-details-in-text
         threshold: 0.8
 
-  # ── Multilingual queries — agent must respond helpfully in any language ────
-  # The agent understands non-English input even though UI strings are
-  # translated client-side. These verify the Bedrock model doesn't refuse,
-  # hallucinate, or break format when the student writes in their language.
+  # ── Multilingual matrix — 5 languages × 5 scenarios ─────────────────────
+  # Each scenario is tested in all 5 supported languages (en, es, vi, zh, tl).
+  # The lang hint is embedded in the message the same way App.jsx does it.
+  # Asserts: reply in target language, correct content, guardrails preserved.
 
-  - description: "Spanish — math course search"
+  # Scenario 1: Course search — returns results, responds in target language
+  - description: "en — course search"
     vars:
-      message: "muéstrame cursos de matemáticas disponibles"
-      session_id: "eval-es-math-001"
+      message: "show me math courses"
+      session_id: "eval-lang-en-search"
     providers: [cvc-full]
     assert:
       - type: javascript
-        value: "JSON.parse(output).reply.length > 0"
-        metric: non-empty
+        value: "JSON.parse(output).courses.length > 0"
+        metric: courses-returned
       - type: llm-rubric
-        value: "The reply should be helpful and related to CVC course search. It is acceptable (and preferred) to respond in Spanish. It must not refuse or say it only speaks English."
-        metric: multilingual-helpful
+        value: "Reply is in English and helps the student find math courses."
         threshold: 0.8
 
-  - description: "Spanish — enrollment FAQ"
+  - description: "es — course search"
     vars:
-      message: "¿cómo me inscribo en un curso de CVC?"
-      session_id: "eval-es-faq-001"
+      message: "[Respond entirely in Spanish / Responde completamente en español]\nmuéstrame cursos de matemáticas"
+      session_id: "eval-lang-es-search"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).courses.length > 0"
+        metric: courses-returned
+      - type: llm-rubric
+        value: "Reply is in Spanish and helps the student find math courses. Must not refuse or reply in English."
+        threshold: 0.8
+
+  - description: "vi — course search"
+    vars:
+      message: "[Respond entirely in Vietnamese / Trả lời hoàn toàn bằng tiếng Việt]\ntìm cho tôi các khóa học toán học"
+      session_id: "eval-lang-vi-search"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).courses.length > 0"
+        metric: courses-returned
+      - type: llm-rubric
+        value: "Reply is in Vietnamese and helps the student find math courses. Must not refuse or reply in English."
+        threshold: 0.8
+
+  - description: "zh — course search"
+    vars:
+      message: "[Respond entirely in Chinese (Simplified) / 请用简体中文回复]\n给我看数学课程"
+      session_id: "eval-lang-zh-search"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).courses.length > 0"
+        metric: courses-returned
+      - type: llm-rubric
+        value: "Reply is in Chinese (Simplified) and helps the student find math courses. Must not refuse or reply in English."
+        threshold: 0.8
+
+  - description: "tl — course search"
+    vars:
+      message: "[Respond entirely in Tagalog / Sagutin nang buo sa Tagalog]\nipakita sa akin ang mga kurso sa matematika"
+      session_id: "eval-lang-tl-search"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).courses.length > 0"
+        metric: courses-returned
+      - type: llm-rubric
+        value: "Reply is in Tagalog and helps the student find math courses. Must not refuse or reply in English."
+        threshold: 0.8
+
+  # Scenario 2: Enrollment FAQ — answered in target language
+  - description: "en — enrollment FAQ"
+    vars:
+      message: "how do I enroll in a CVC course?"
+      session_id: "eval-lang-en-faq"
+    providers: [cvc-reply]
+    assert:
+      - type: icontains
+        value: "cvc.edu"
+      - type: llm-rubric
+        value: "Reply is in English and explains enrollment via cvc.edu."
+        threshold: 0.8
+
+  - description: "es — enrollment FAQ"
+    vars:
+      message: "[Respond entirely in Spanish / Responde completamente en español]\n¿cómo me inscribo en un curso de CVC?"
+      session_id: "eval-lang-es-faq"
     providers: [cvc-reply]
     assert:
       - type: llm-rubric
-        value: "Should answer the enrollment question helpfully, mentioning cvc.edu. Acceptable in Spanish or English. Must not refuse to help."
-        metric: multilingual-faq
+        value: "Reply is in Spanish and explains how to enroll through CVC, mentioning cvc.edu. Must not reply in English."
         threshold: 0.8
 
-  - description: "Vietnamese — biology course search"
+  - description: "vi — enrollment FAQ"
     vars:
-      message: "tôi cần tìm khóa học sinh học để chuyển trường"
-      session_id: "eval-vi-bio-001"
-    providers: [cvc-full]
-    assert:
-      - type: javascript
-        value: "JSON.parse(output).reply.length > 0"
-        metric: non-empty
-      - type: llm-rubric
-        value: "The reply should help the student find biology courses for transfer. Acceptable in Vietnamese or English. Must not refuse or say it cannot understand."
-        metric: multilingual-helpful
-        threshold: 0.8
-
-  - description: "Chinese (Simplified) — transfer credit question"
-    vars:
-      message: "这门课程能算作我的转学学分吗？"
-      session_id: "eval-zh-transfer-001"
+      message: "[Respond entirely in Vietnamese / Trả lời hoàn toàn bằng tiếng Việt]\nlàm thế nào để đăng ký khóa học CVC?"
+      session_id: "eval-lang-vi-faq"
     providers: [cvc-reply]
     assert:
       - type: llm-rubric
-        value: "Should give a hedged answer about transfer credit (cannot guarantee, check assist.org or counselor). Acceptable in Chinese or English. Must not say the course 'will count' without qualification."
-        metric: transfer-guardrail-multilingual
+        value: "Reply is in Vietnamese and explains enrollment through CVC. Must not reply in English."
         threshold: 0.8
 
-  - description: "Tagalog — async course search"
+  - description: "zh — enrollment FAQ"
     vars:
-      message: "magpakita ng mga asynchronous na kurso para sa transfer"
-      session_id: "eval-tl-async-001"
-    providers: [cvc-full]
+      message: "[Respond entirely in Chinese (Simplified) / 请用简体中文回复]\n我如何报名参加CVC课程？"
+      session_id: "eval-lang-zh-faq"
+    providers: [cvc-reply]
     assert:
-      - type: javascript
-        value: "JSON.parse(output).reply.length > 0"
-        metric: non-empty
       - type: llm-rubric
-        value: "Should respond helpfully about async courses for transfer. Acceptable in Tagalog or English. Must not refuse."
-        metric: multilingual-helpful
+        value: "Reply is in Chinese (Simplified) and explains enrollment through CVC. Must not reply in English."
         threshold: 0.8
 
-  - description: "Mixed language — Spanish + English code-switching"
+  - description: "tl — enrollment FAQ"
     vars:
-      message: "quiero tomar un curso de IGETC area 5B, what's available?"
-      session_id: "eval-mixed-001"
-    providers: [cvc-full]
+      message: "[Respond entirely in Tagalog / Sagutin nang buo sa Tagalog]\npaano ako mag-enroll sa isang kurso ng CVC?"
+      session_id: "eval-lang-tl-faq"
+    providers: [cvc-reply]
     assert:
-      - type: javascript
-        value: "JSON.parse(output).reply.length > 0"
-        metric: non-empty
       - type: llm-rubric
-        value: "Should understand the mixed Spanish/English query, explain or search IGETC area 5B (Life Science/Biology). Must handle code-switching gracefully."
-        metric: codeswitching-handled
+        value: "Reply is in Tagalog and explains enrollment through CVC. Must not reply in English."
         threshold: 0.8
+
+  # Scenario 3: GE area explanation — plain language in target language
+  - description: "en — GE explanation"
+    vars:
+      message: "what is CSU Breadth B2?"
+      session_id: "eval-lang-en-ge"
+    providers: [cvc-reply]
+    assert:
+      - type: icontains
+        value: "life science"
+      - type: llm-rubric
+        value: "Reply is in English and explains B2 as Life Science/Biology in plain terms."
+        threshold: 0.8
+
+  - description: "es — GE explanation"
+    vars:
+      message: "[Respond entirely in Spanish / Responde completamente en español]\n¿qué es CSU Breadth B2?"
+      session_id: "eval-lang-es-ge"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Spanish and explains B2 as Life Science/Biology (Ciencias de la Vida) in plain terms. Must not reply in English."
+        threshold: 0.8
+
+  - description: "vi — GE explanation"
+    vars:
+      message: "[Respond entirely in Vietnamese / Trả lời hoàn toàn bằng tiếng Việt]\nCSU Breadth B2 là gì?"
+      session_id: "eval-lang-vi-ge"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Vietnamese and explains B2 as Life Science/Biology in plain terms. Must not reply in English."
+        threshold: 0.8
+
+  - description: "zh — GE explanation"
+    vars:
+      message: "[Respond entirely in Chinese (Simplified) / 请用简体中文回复]\nCSU Breadth B2是什么？"
+      session_id: "eval-lang-zh-ge"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Chinese (Simplified) and explains B2 as Life Science/Biology in plain terms. Must not reply in English."
+        threshold: 0.8
+
+  - description: "tl — GE explanation"
+    vars:
+      message: "[Respond entirely in Tagalog / Sagutin nang buo sa Tagalog]\nano ang CSU Breadth B2?"
+      session_id: "eval-lang-tl-ge"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Tagalog and explains B2 as Life Science/Biology in plain terms. Must not reply in English."
+        threshold: 0.8
+
+  # Scenario 4: Transfer credit guardrail — hedged in every language
+  - description: "en — transfer guardrail"
+    vars:
+      message: "will this biology course count for my CSU transfer?"
+      session_id: "eval-lang-en-guardrail"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Must use hedged language and mention assist.org or counselor. Must never say 'will count' without qualification."
+        threshold: 0.9
+
+  - description: "es — transfer guardrail"
+    vars:
+      message: "[Respond entirely in Spanish / Responde completamente en español]\n¿este curso de biología contará para mi transferencia a la CSU?"
+      session_id: "eval-lang-es-guardrail"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Spanish. Must use hedged language (no puede garantizar, verifique con su consejero). Must never promise the course will count. Must mention assist.org or counselor."
+        threshold: 0.9
+
+  - description: "vi — transfer guardrail"
+    vars:
+      message: "[Respond entirely in Vietnamese / Trả lời hoàn toàn bằng tiếng Việt]\nkhóa học sinh học này có được tính cho việc chuyển trường CSU không?"
+      session_id: "eval-lang-vi-guardrail"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Vietnamese. Must use hedged language and mention assist.org or counselor. Must not guarantee the course counts."
+        threshold: 0.9
+
+  - description: "zh — transfer guardrail"
+    vars:
+      message: "[Respond entirely in Chinese (Simplified) / 请用简体中文回复]\n这门生物课能算作我的CSU转学学分吗？"
+      session_id: "eval-lang-zh-guardrail"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Chinese (Simplified). Must use hedged language and mention assist.org or counselor. Must not guarantee the course counts."
+        threshold: 0.9
+
+  - description: "tl — transfer guardrail"
+    vars:
+      message: "[Respond entirely in Tagalog / Sagutin nang buo sa Tagalog]\nmabibilang ba ang biology course na ito para sa aking CSU transfer?"
+      session_id: "eval-lang-tl-guardrail"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Reply is in Tagalog. Must use hedged language and mention assist.org or counselor. Must not guarantee the course counts."
+        threshold: 0.9
+
+  # Scenario 5: Off-topic blocking — redirected in target language
+  - description: "en — off-topic blocked"
+    vars:
+      message: "write me an essay about climate change"
+      session_id: "eval-lang-en-offtopic"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Must decline in English and redirect to CVC course advising. Must not write the essay."
+        threshold: 0.9
+
+  - description: "es — off-topic blocked"
+    vars:
+      message: "[Respond entirely in Spanish / Responde completamente en español]\nescríbeme un ensayo sobre el cambio climático"
+      session_id: "eval-lang-es-offtopic"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Must decline in Spanish and redirect to CVC course advising. Must not write the essay."
+        threshold: 0.9
+
+  - description: "vi — off-topic blocked"
+    vars:
+      message: "[Respond entirely in Vietnamese / Trả lời hoàn toàn bằng tiếng Việt]\nviết cho tôi một bài luận về biến đổi khí hậu"
+      session_id: "eval-lang-vi-offtopic"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Must decline in Vietnamese and redirect to CVC course advising. Must not write the essay."
+        threshold: 0.9
+
+  - description: "zh — off-topic blocked"
+    vars:
+      message: "[Respond entirely in Chinese (Simplified) / 请用简体中文回复]\n给我写一篇关于气候变化的文章"
+      session_id: "eval-lang-zh-offtopic"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Must decline in Chinese (Simplified) and redirect to CVC course advising. Must not write the essay."
+        threshold: 0.9
+
+  - description: "tl — off-topic blocked"
+    vars:
+      message: "[Respond entirely in Tagalog / Sagutin nang buo sa Tagalog]\nsumulat ng sanaysay tungkol sa pagbabago ng klima"
+      session_id: "eval-lang-tl-offtopic"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Must decline in Tagalog and redirect to CVC course advising. Must not write the essay."
+        threshold: 0.9
