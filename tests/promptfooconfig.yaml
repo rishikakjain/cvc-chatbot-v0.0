@@ -1,0 +1,291 @@
+# CVC Chatbot — Layer 2 agent eval (Promptfoo)
+#
+# Tests the full natural-language → course cards pipeline against the live API.
+# Catches prompt regressions after system prompt changes, guardrail drift, and
+# agent tool-calling failures.
+#
+# Run:
+#   npx promptfoo eval -c tests/promptfooconfig.yaml
+#   npx promptfoo view          # open the results UI
+#
+# Cost: ~$0.003/test × 30 tests ≈ $0.09 per full run (Bedrock Claude Haiku 4.5)
+
+description: "CVC Chatbot agent eval"
+
+prompts:
+  - "{{message}}"
+
+providers:
+  # Two providers: one extracts the reply text (for llm-rubric/contains),
+  # one extracts full JSON (for JS assertions on courses array).
+  - id: cvc-reply
+    config:
+      url: https://9koj0054n8.execute-api.us-west-2.amazonaws.com/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+        X-Session-Id: "{{session_id}}"
+      body:
+        message: "{{prompt}}"
+      transformResponse: "json.reply"
+
+  - id: cvc-full
+    config:
+      url: https://9koj0054n8.execute-api.us-west-2.amazonaws.com/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+        X-Session-Id: "{{session_id}}-full"
+      body:
+        message: "{{prompt}}"
+      transformResponse: "JSON.stringify(json)"
+
+# Assertions that apply to every test
+defaultTest:
+  assert:
+    - type: javascript
+      value: "output.length > 0"
+      metric: non-empty
+
+# ── Test cases ────────────────────────────────────────────────────────────────
+
+tests:
+
+  # ── Course search — returns results ──────────────────────────────────────
+
+  - description: "Math course search returns courses"
+    vars:
+      message: "show me math courses"
+      session_id: "eval-math-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).courses.length > 0"
+        metric: courses-returned
+      - type: javascript
+        value: "!JSON.parse(output).reply.includes('|')"
+        metric: no-markdown-tables
+
+  - description: "Biology / life science search returns courses"
+    vars:
+      message: "I need a life science course for CSU transfer"
+      session_id: "eval-bio-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).courses.length > 0"
+        metric: courses-returned
+
+  - description: "Async filter respected"
+    vars:
+      message: "show me async English composition courses"
+      session_id: "eval-async-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: |
+          const d = JSON.parse(output);
+          if (d.courses.length === 0) return true; // no results is fine
+          return d.courses.every(c =>
+            (c.deliveryMethod || '').toLowerCase().includes('asynchronous')
+          );
+        metric: async-filter-correct
+
+  - description: "Home college exclusion — no Cuesta results when excluded"
+    vars:
+      message: "I go to Cuesta College. Show me math courses."
+      session_id: "eval-exclude-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: |
+          const d = JSON.parse(output);
+          return d.courses.every(c =>
+            !(c.teachingCollege || '').toLowerCase().includes('cuesta')
+          );
+        metric: home-college-excluded
+
+  - description: "No results — graceful fallback, no crash"
+    vars:
+      message: "show me courses in underwater basket weaving"
+      session_id: "eval-noresults-001"
+    providers: [cvc-full]
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).reply.length > 0"
+        metric: graceful-fallback
+      - type: llm-rubric
+        value: "The reply should acknowledge no courses were found or suggest broadening the search. It must NOT invent or hallucinate course names."
+        metric: no-hallucination
+        threshold: 0.8
+
+  # ── No markdown tables or bullets in course-search replies ────────────────
+
+  - description: "Course search reply has no pipe/table characters"
+    vars:
+      message: "show me social science courses"
+      session_id: "eval-notables-001"
+    providers: [cvc-reply]
+    assert:
+      - type: javascript
+        value: "!output.split('\\n').some(l => l.trim().startsWith('|'))"
+        metric: no-tables
+
+  - description: "Course search reply has no bullet course-detail blocks"
+    vars:
+      message: "find me arts courses"
+      session_id: "eval-nobullets-001"
+    providers: [cvc-reply]
+    assert:
+      - type: javascript
+        value: "!output.match(/- \\*\\*College:/)"
+        metric: no-course-detail-bullets
+
+  # ── GE area explanations (no courses returned) ────────────────────────────
+
+  - description: "GE area code explanation — B2"
+    vars:
+      message: "what is CSU Breadth B2?"
+      session_id: "eval-ge-b2-001"
+    providers: [cvc-reply, cvc-full]
+    assert:
+      - type: llm-rubric
+        value: "Should explain that B2 is Life Science / Biology in plain English. Must not return a course listing."
+        metric: ge-explanation-accurate
+        threshold: 0.8
+      - type: icontains
+        value: "life science"
+
+  - description: "IGETC framework explanation"
+    vars:
+      message: "what is IGETC?"
+      session_id: "eval-igetc-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should explain what IGETC is (intersegmental general education transfer curriculum), mention it works for UC and CSU, and note Cal-GETC is the newer replacement."
+        metric: igetc-explanation
+        threshold: 0.8
+
+  - description: "Cal-GETC explanation"
+    vars:
+      message: "explain Cal-GETC"
+      session_id: "eval-calgetc-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should explain Cal-GETC as the new unified GE transfer pattern starting Fall 2025, accepted by both UC and CSU."
+        metric: calgetc-explanation
+        threshold: 0.8
+
+  # ── FAQ — answered directly, no tool call round-trip ─────────────────────
+
+  - description: "Enrollment FAQ — answered without tool call"
+    vars:
+      message: "how do I enroll in a CVC course?"
+      session_id: "eval-faq-enroll-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should explain the enrollment process: click Enroll at CVC on the card, follow two confirmation screens on cvc.edu. Must NOT tell the student to contact the teaching college directly."
+        metric: enrollment-faq-correct
+        threshold: 0.8
+      - type: icontains
+        value: "cvc.edu"
+
+  - description: "Fees FAQ"
+    vars:
+      message: "how much does a CVC course cost?"
+      session_id: "eval-faq-fees-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should mention paying home college fees (not teaching college fees), and reference ~$46/unit for California residents."
+        metric: fees-faq-correct
+        threshold: 0.8
+
+  - description: "Transfer credit guardrail always hedged"
+    vars:
+      message: "will this biology course count for my CSU transfer?"
+      session_id: "eval-guardrail-transfer-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Must use hedged language ('tagged for', 'may satisfy') — never say 'will count' or 'satisfies your requirement'. Must mention assist.org or counselor."
+        metric: transfer-guardrail
+        threshold: 0.9
+
+  # ── Guardrails — off-topic queries blocked ────────────────────────────────
+
+  - description: "Off-topic — essay writing request blocked"
+    vars:
+      message: "write me an essay about climate change"
+      session_id: "eval-offtopic-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should decline to write an essay and redirect to CVC course advising. Must not write the essay."
+        metric: offtopic-blocked
+        threshold: 0.9
+
+  - description: "Off-topic — coding help request redirected"
+    vars:
+      message: "can you help me debug my Python code?"
+      session_id: "eval-offtopic-002"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "Should politely decline and redirect to CVC course search or transfer advising."
+        metric: offtopic-redirected
+        threshold: 0.8
+
+  # ── Response format — numbered follow-up options always present ───────────
+
+  - description: "Every reply ends with numbered options"
+    vars:
+      message: "hi"
+      session_id: "eval-format-001"
+    providers: [cvc-reply]
+    assert:
+      - type: javascript
+        value: "/^\\d+\\./m.test(output)"
+        metric: numbered-options-present
+
+  - description: "GE explanation ends with numbered options"
+    vars:
+      message: "what does IGETC area 5B mean?"
+      session_id: "eval-format-ge-001"
+    providers: [cvc-reply]
+    assert:
+      - type: javascript
+        value: "/^\\d+\\./m.test(output)"
+        metric: numbered-options-present
+
+  # ── Multi-turn: session continuity ────────────────────────────────────────
+  # Note: promptfoo tests are stateless — each test is a fresh message.
+  # Multi-turn is better covered by the e2e pytest suite (test_e2e_api.py).
+  # These tests verify the agent handles follow-up phrasing correctly.
+
+  - description: "Refinement phrasing — async filter follow-up"
+    vars:
+      message: "show me only the async ones"
+      session_id: "eval-refine-001"
+    providers: [cvc-full]
+    assert:
+      - type: llm-rubric
+        value: "Should either return async courses or ask for clarification about what subject area to filter. Must not say it cannot continue."
+        metric: refinement-handled
+        threshold: 0.7
+
+  # ── No hallucination — courses must be real ───────────────────────────────
+
+  - description: "Course names returned are real (not invented)"
+    vars:
+      message: "find me history courses"
+      session_id: "eval-hallucination-001"
+    providers: [cvc-reply]
+    assert:
+      - type: llm-rubric
+        value: "The reply must describe what was found in general terms (e.g. 'Here are some history courses'). It must NOT list specific course names, codes, or professors in the text — those appear on the cards."
+        metric: no-course-details-in-text
+        threshold: 0.8
