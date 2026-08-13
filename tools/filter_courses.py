@@ -35,11 +35,13 @@ def load_courses(source_path: str | Path | None = None) -> list[dict]:
 
 def filter_courses(
     ge_areas: list[str] | None = None,
+    subject_keyword: str | None = None,
     delivery_method: str | None = None,
     exclude_college: str | None = None,
     start_after: str | None = None,
     has_seats: bool = True,
-    top_n: int = 5,
+    ztc: bool = False,
+    top_n: int = 10,
     source_path: str | Path | None = None,
 ) -> list[dict]:
     """
@@ -48,10 +50,11 @@ def filter_courses(
     Args:
         ge_areas:        List of GE area codes to match (any of; e.g. ["B1","B3"]).
                          Checks csuBreadth, igetc, and calGetc fields.
-                         None = no GE filter (returns all subjects).
+                         None = no GE filter.
+        subject_keyword: Free-text keyword matched against courseName (case-insensitive).
+                         Use when student asks by subject name e.g. "math", "biology", "history".
         delivery_method: "async" | "sync" | None (no filter).
         exclude_college: Exact teaching college name to exclude (student's home college).
-                         v0.1 hook: this param will also trigger ASSIST crosswalk lookup.
         start_after:     ISO date string "YYYY-MM-DD"; exclude courses starting before this.
         has_seats:       If True, only return courses with seatsAvailable > 0.
         top_n:           Max results to return.
@@ -63,6 +66,23 @@ def filter_courses(
     courses = load_courses(source_path)
     results = []
 
+    # Expand bare parent codes to sub-codes present in data
+    # e.g. "5" → ["5A","5B","5C"], "4" → ["4","4A",...,"4J"], "D" → ["D","D1",...,"D9"]
+    if ge_areas:
+        expanded = []
+        all_codes = set()
+        for c in courses:
+            for field in ("csuBreadth", "igetc", "calGetc"):
+                all_codes.update(c.get(field) or [])
+        for code in ge_areas:
+            cu = code.upper()
+            children = [c for c in all_codes if c.upper().startswith(cu) and c.upper() != cu]
+            if children:
+                expanded.extend(children)
+            else:
+                expanded.append(code)
+        ge_areas = expanded
+
     delivery_filter = None
     if delivery_method:
         dl = delivery_method.lower()
@@ -71,9 +91,11 @@ def filter_courses(
         elif "sync" in dl:
             delivery_filter = "online - synchronous"
 
+    keyword = subject_keyword.lower().strip() if subject_keyword else None
+
     for course in courses:
         # Exclude student's home college
-        if exclude_college and course.get("teachingCollege", "").lower() == exclude_college.lower():
+        if exclude_college and exclude_college.lower() in course.get("teachingCollege", "").lower():
             continue
 
         # Delivery method filter
@@ -104,6 +126,21 @@ def filter_courses(
             if not any(code.upper() in course_areas_upper for code in ge_areas):
                 continue
 
+        # ZTC filter — badge field or courseNotes mentioning ZTC
+        if ztc:
+            badges = course.get("badges") or []
+            notes = str(course.get("courseNotes") or "").lower()
+            has_ztc_badge = any("zero textbook" in str(b).lower() for b in badges)
+            has_ztc_note = "zero textbook" in notes or " ztc" in notes or notes.startswith("ztc")
+            if not has_ztc_badge and not has_ztc_note:
+                continue
+
+        # Subject keyword filter — matches against course name
+        if keyword:
+            name = (course.get("courseName") or "").lower()
+            if keyword not in name:
+                continue
+
         results.append(course)
 
     # Sort by seats available descending, then by start date ascending
@@ -112,6 +149,16 @@ def filter_courses(
     )
 
     return results[:top_n]
+
+
+def _normalize_name(name: str | None) -> str | None:
+    """Title-case a course name if it is all-uppercase, leave mixed-case alone."""
+    if not name:
+        return name
+    stripped = name.strip()
+    if stripped == stripped.upper():
+        return stripped.title()
+    return stripped
 
 
 def summarize_course(course: dict) -> dict:
@@ -125,18 +172,53 @@ def summarize_course(course: dict) -> dict:
         if codes:
             ge_tags.append(f"{label}: {', '.join(codes)}")
 
+    available = course.get("seatsAvailable")
+    total = course.get("seatCount")
+    # Clamp negative seat counts to 0 (data quality issue in source CSV)
+    if available is not None:
+        available = max(0, int(available))
+    if available is not None and total:
+        seats_str = f"{available} out of {total}"
+    elif available is not None:
+        seats_str = str(available)
+    else:
+        seats_str = None
+
+    # Build flat GE tag list with framework prefix so the frontend can colour-code them
+    # Format: ["CSU B4", "IGETC 2A", "Cal-GETC 2"]
+    ge_chips = []
+    for code in (course.get("csuBreadth") or []):
+        ge_chips.append(f"CSU {code}")
+    for code in (course.get("igetc") or []):
+        ge_chips.append(f"IGETC {code}")
+    for code in (course.get("calGetc") or []):
+        ge_chips.append(f"Cal-GETC {code}")
+
+    units = course.get("units")
+    if units is not None:
+        units = units if units > 0 else None  # treat 0-unit courses as unknown
+
+    badges = course.get("badges") or []
+    notes_lower = str(course.get("courseNotes") or "").lower()
+    is_ztc = (
+        any("zero textbook" in str(b).lower() for b in badges)
+        or "zero textbook" in notes_lower
+        or " ztc" in notes_lower
+        or notes_lower.startswith("ztc")
+    )
+
     return {
         "courseCode": course.get("courseCode"),
-        "courseName": course.get("courseName"),
+        "courseName": _normalize_name(course.get("courseName")),
         "teachingCollege": course.get("teachingCollege"),
-        "units": course.get("units"),
+        "units": units,
         "deliveryMethod": course.get("deliveryMethod"),
         "startDate": course.get("startDate"),
         "endDate": course.get("endDate"),
-        "seatsAvailable": course.get("seatsAvailable"),
-        "seatCount": course.get("seatCount"),
+        "availableSeats": seats_str,
         "professors": course.get("professors"),
-        "badges": course.get("badges") or [],
-        "geTags": ge_tags,
-        "courseNotes": course.get("courseNotes"),
+        "badges": badges,
+        "isZtc": is_ztc,
+        "geChips": ge_chips,
+        "courseNotes": _normalize_name(course.get("courseNotes")),
     }
