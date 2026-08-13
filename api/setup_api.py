@@ -4,12 +4,14 @@ Provision Phase 3 AWS infrastructure:
   - Lambda function: cvc-chatbot-session-handler
   - API Gateway HTTP API: cvc-chatbot-api
   - S3 bucket for frontend hosting
+  - CloudFront distribution (HTTPS CDN in front of S3)
 
 Run after setup_agent.py (reads .env.agent for agent IDs).
 
     python api/setup_api.py
 
-Appends to .env.agent with the API Gateway URL and S3 bucket name.
+Appends to .env.agent with the API Gateway URL, S3 bucket name,
+CloudFront distribution ID, and CloudFront URL.
 """
 
 from __future__ import annotations
@@ -267,6 +269,127 @@ def ensure_s3_bucket(s3, account_id: str) -> str:
     return bucket_name
 
 
+def setup_cloudfront(s3, bucket_name: str, account_id: str) -> tuple[str, str]:
+    """Create (or find existing) a CloudFront distribution in front of the S3 bucket.
+
+    Uses Origin Access Control so the S3 bucket can be fully private — no public-read
+    bucket policy needed. Returns (distribution_id, cloudfront_domain).
+    """
+    cf = boto3.client("cloudfront")  # CloudFront is global, no region needed
+    s3_origin_domain = f"{bucket_name}.s3.{AWS_REGION}.amazonaws.com"
+
+    # Check if a distribution for this bucket already exists
+    paginator = cf.get_paginator("list_distributions")
+    for page in paginator.paginate():
+        items = page.get("DistributionList", {}).get("Items", [])
+        for dist in items:
+            origins = dist.get("Origins", {}).get("Items", [])
+            for origin in origins:
+                if origin.get("DomainName") == s3_origin_domain:
+                    dist_id = dist["Id"]
+                    domain = dist["DomainName"]
+                    print(f"  Using existing CloudFront distribution: {dist_id}")
+                    _ensure_oac_bucket_policy(s3, bucket_name, dist_id, account_id)
+                    return dist_id, domain
+
+    # Create Origin Access Control
+    oac_resp = cf.create_origin_access_control(
+        OriginAccessControlConfig={
+            "Name": f"cvc-chatbot-oac-{account_id}",
+            "Description": "OAC for CVC chatbot S3 frontend bucket",
+            "SigningProtocol": "sigv4",
+            "SigningBehavior": "always",
+            "OriginAccessControlOriginType": "s3",
+        }
+    )
+    oac_id = oac_resp["OriginAccessControl"]["Id"]
+    print(f"  Created Origin Access Control: {oac_id}")
+
+    # Create distribution
+    dist_resp = cf.create_distribution(
+        DistributionConfig={
+            "CallerReference": f"cvc-chatbot-{account_id}",
+            "Comment": "CVC chatbot frontend",
+            "Enabled": True,
+            "DefaultRootObject": "index.html",
+            "PriceClass": "PriceClass_100",  # US, Canada, Europe, Israel
+            "Origins": {
+                "Quantity": 1,
+                "Items": [{
+                    "Id": "s3-origin",
+                    "DomainName": s3_origin_domain,
+                    "S3OriginConfig": {"OriginAccessIdentity": ""},  # required but empty when using OAC
+                    "OriginAccessControlId": oac_id,
+                }],
+            },
+            "DefaultCacheBehavior": {
+                "TargetOriginId": "s3-origin",
+                "ViewerProtocolPolicy": "redirect-to-https",
+                "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",  # CachingOptimized (AWS managed)
+                "AllowedMethods": {
+                    "Quantity": 2,
+                    "Items": ["GET", "HEAD"],
+                    "CachedMethods": {"Quantity": 2, "Items": ["GET", "HEAD"]},
+                },
+                "Compress": True,
+            },
+            # SPA routing: any 403/404 from S3 → serve index.html with 200
+            "CustomErrorResponses": {
+                "Quantity": 2,
+                "Items": [
+                    {
+                        "ErrorCode": 403,
+                        "ResponsePagePath": "/index.html",
+                        "ResponseCode": "200",
+                        "ErrorCachingMinTTL": 0,
+                    },
+                    {
+                        "ErrorCode": 404,
+                        "ResponsePagePath": "/index.html",
+                        "ResponseCode": "200",
+                        "ErrorCachingMinTTL": 0,
+                    },
+                ],
+            },
+        }
+    )
+    dist = dist_resp["Distribution"]
+    dist_id = dist["Id"]
+    domain = dist["DomainName"]
+    print(f"  Created CloudFront distribution: {dist_id}")
+    print(f"  Domain (propagates in ~15 min): https://{domain}")
+
+    _ensure_oac_bucket_policy(s3, bucket_name, dist_id, account_id)
+    return dist_id, domain
+
+
+def _ensure_oac_bucket_policy(s3, bucket_name: str, dist_id: str, account_id: str) -> None:
+    """Replace the public-read bucket policy with an OAC-scoped policy."""
+    # Remove public access block (required to set any bucket policy)
+    try:
+        s3.delete_public_access_block(Bucket=bucket_name)
+    except Exception:
+        pass
+
+    policy = {
+        "Version": "2012-10-17",
+        "Statement": [{
+            "Sid": "AllowCloudFrontOAC",
+            "Effect": "Allow",
+            "Principal": {"Service": "cloudfront.amazonaws.com"},
+            "Action": "s3:GetObject",
+            "Resource": f"arn:aws:s3:::{bucket_name}/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": f"arn:aws:cloudfront::{account_id}:distribution/{dist_id}"
+                }
+            },
+        }],
+    }
+    s3.put_bucket_policy(Bucket=bucket_name, Policy=json.dumps(policy))
+    print(f"  Updated S3 bucket policy → OAC-only access (private bucket)")
+
+
 def main() -> None:
     env_vars = read_env_agent()
 
@@ -344,10 +467,15 @@ def main() -> None:
     print("\n4. S3 frontend bucket")
     bucket_name = ensure_s3_bucket(s3, account_id)
 
+    print("\n5. CloudFront distribution")
+    cf_dist_id, cf_domain = setup_cloudfront(s3, bucket_name, account_id)
+
     append_env_agent(
         API_URL=api_url,
         S3_BUCKET=bucket_name,
         DYNAMODB_TABLE=DYNAMO_TABLE,
+        CLOUDFRONT_DISTRIBUTION_ID=cf_dist_id,
+        CLOUDFRONT_URL=cf_domain,
     )
 
     print(f"""
@@ -356,15 +484,17 @@ Setup complete!
   API endpoint:  {api_url}/chat
   S3 bucket:     {bucket_name}
   DynamoDB:      {DYNAMO_TABLE}
+  CloudFront:    https://{cf_domain}
+    (distribution ID: {cf_dist_id})
+    NOTE: new distributions take ~10-15 min to propagate globally.
 
-Next: build and deploy the frontend
-  cd frontend
-  npm install
-  npm run build
-  aws s3 sync dist/ s3://{bucket_name}/
+Deploy the frontend:
+  bash scripts/deploy_frontend.sh
 
-Frontend URL (S3 static site):
-  http://{bucket_name}.s3-website-{AWS_REGION}.amazonaws.com
+  — or manually:
+  cd frontend && npm run build
+  aws s3 sync dist/ s3://{bucket_name}/ --delete
+  aws cloudfront create-invalidation --distribution-id {cf_dist_id} --paths "/*"
 """)
 
 

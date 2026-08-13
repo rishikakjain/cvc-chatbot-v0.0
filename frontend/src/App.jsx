@@ -325,7 +325,6 @@ function profileSummary(answers, t) {
 function makeInitialMessages(hasProfile) {
   if (hasProfile) return [{ role: 'assistant', content: null, isWelcome: true }]
   return [
-    { role: 'assistant', content: null, isWelcome: true },
     { role: 'assistant', content: null, isOnboarding: true, stepId: FIRST_STEP },
   ]
 }
