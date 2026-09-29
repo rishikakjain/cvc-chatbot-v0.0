@@ -27,7 +27,7 @@ flowchart TB
   classDef security fill:#FEFCE8,stroke:#CA8A04,color:#713F12,stroke-width:2px;
   classDef dev fill:#F1F5F9,stroke:#64748B,color:#0F172A,stroke-width:2px;
 
-  subgraph Client[1 · Student browser]
+  subgraph Client["1 · Student browser"]
     direction TB
     Student([Student]):::user
     SPA[React 18 + Vite single-page application<br/>App · i18n · theme · accessible components]:::edge
@@ -38,7 +38,7 @@ flowchart TB
     SPA <--> BrowserSession
   end
 
-  subgraph Delivery[2 · Static application delivery]
+  subgraph Delivery["2 · Static application delivery"]
     direction LR
     CDN[Amazon CloudFront<br/>HTTPS redirect · compression<br/>GET/HEAD cache behavior<br/>SPA 403/404 → index.html]:::edge
     OAC[Origin Access Control<br/>SigV4 service-to-service access]:::security
@@ -46,7 +46,7 @@ flowchart TB
     CDN --> OAC --> Assets
   end
 
-  subgraph PublicAPI[3 · Public API boundary]
+  subgraph PublicAPI["3 · Public API boundary"]
     direction TB
     APIGW[Amazon API Gateway HTTP API<br/><code>POST /chat</code><br/>CORS: Content-Type, X-Session-Id]:::edge
     Request[Request JSON<br/><code>message</code> + optional filter context<br/>Header: <code>X-Session-Id</code>]:::edge
@@ -55,7 +55,7 @@ flowchart TB
     APIGW --- Response
   end
 
-  subgraph Runtime[4 · AWS Lambda — cvc-chatbot-session-handler (Python 3.12)]
+  subgraph Runtime["4 · AWS Lambda — cvc-chatbot-session-handler · Python 3.12"]
     direction TB
     Handler[HTTP handler<br/>validates method/body · CORS response<br/>creates UUID when session absent]:::compute
     SessionMgr[Session manager<br/>loads/saves turn history + preferences<br/>refreshes TTL to 24 hours]:::compute
@@ -68,14 +68,14 @@ flowchart TB
     GuardCheck -- permitted --> ConverseLoop --> Formatter
   end
 
-  subgraph State[5 · Short-lived conversation state]
+  subgraph State["5 · Short-lived conversation state"]
     direction TB
     DDB[(Amazon DynamoDB<br/><code>cvc_sessions</code><br/>PK: session_id<br/>messages serialized · home_college<br/>turn_count · created_at · ttl)]:::data
     TTL[DynamoDB TTL expiry<br/>24-hour session retention target]:::security
     DDB --- TTL
   end
 
-  subgraph AI[6 · Amazon Bedrock runtime]
+  subgraph AI["6 · Amazon Bedrock runtime"]
     direction TB
     Guardrails[Bedrock Guardrails<br/>input policy check via ApplyGuardrail<br/>off-topic requests denied]:::security
     Converse[Bedrock Converse API<br/>Claude Haiku model ID from environment<br/>system prompt + conversation + tool schema]:::ai
@@ -87,7 +87,7 @@ flowchart TB
     ToolDecision -- tool_use --> ToolUse
   end
 
-  subgraph Tools[7 · Deterministic application tools in the Lambda package]
+  subgraph Tools["7 · Deterministic application tools in the Lambda package"]
     direction TB
     Dispatch[Tool dispatcher<br/>executes only declared tool names<br/>serializes JSON tool results]:::compute
     Filter[<code>filter_courses</code><br/>eligibility + deterministic ranking]:::compute
@@ -99,7 +99,7 @@ flowchart TB
     Dispatch --> FAQ
   end
 
-  subgraph CourseData[8 · Course data boundary]
+  subgraph CourseData["8 · Course data boundary"]
     direction TB
     DataAdapter[Portable data access layer<br/><code>data/db.py</code> · camelCase row mapping<br/>cached resources in warm runtime]:::compute
     Local[(Local development / tests<br/>SQLite <code>courses.db</code><br/>schema.sql)]:::data
@@ -113,7 +113,7 @@ flowchart TB
     Bundle --- Rules
   end
 
-  subgraph Security[9 · Security, identity, and network controls]
+  subgraph Security["9 · Security, identity, and network controls"]
     direction TB
     IAM[IAM execution role<br/>least-privilege intent:<br/>Lambda invoke · Bedrock runtime<br/>DynamoDB session-item access]:::security
     VPC[Production database isolation<br/>VPC + security groups<br/>Aurora private access]:::security
@@ -122,7 +122,7 @@ flowchart TB
     IAM --- VPC
   end
 
-  subgraph DeliveryOps[10 · Build, release, and validation]
+  subgraph DeliveryOps["10 · Build, release, and validation"]
     direction TB
     Dev[Developer workstation / CI]:::dev
     ReactBuild[<code>npm run build</code><br/>Vite compiles frontend]:::dev
