@@ -39,7 +39,7 @@
   <rect width="1200" height="860" rx="28" fill="url(#canvas)"/>
   <rect x="28" y="24" width="1144" height="112" rx="22" fill="#fff" filter="url(#shadow)"/>
   <text x="72" y="70" class="eyebrow">CVC CHATBOT · SYSTEM OVERVIEW</text>
-  <text x="72" y="108" class="heading" font-size="31" font-weight="700">From a student question to grounded course results</text>
+  <text x="72" y="108" class="heading" font-size="31" font-weight="700" textLength="790" lengthAdjust="spacingAndGlyphs">From a student question to grounded course results</text>
   <rect x="983" y="57" width="137" height="42" rx="21" fill="#e9f9f0"/>
   <circle cx="1008" cy="78" r="8" fill="#1eaa6e"/>
   <path d="M1004 78l3 3 6-7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -69,10 +69,10 @@
     <path d="M196 268h11M196 273h11M196 278h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
     <text x="225" y="278" class="card-title" font-size="16">Web application</text>
     <text x="190" y="327" class="card-label">REACT CHAT EXPERIENCE</text>
-    <text x="190" y="354" class="card-copy">Messages, filters, and</text>
-    <text x="190" y="374" class="card-copy">structured course cards</text>
-    <rect x="189" y="393" width="146" height="28" rx="14" fill="#edf4ff"/>
-    <text x="202" y="412" class="chip">CloudFront + S3 delivery</text>
+    <text x="190" y="354" class="card-copy">Messages, filters, and cards</text>
+    <text x="190" y="374" class="card-copy">for each course search</text>
+    <rect x="189" y="393" width="155" height="28" rx="14" fill="#edf4ff"/>
+    <text x="202" y="412" class="chip" textLength="129" lengthAdjust="spacingAndGlyphs">CloudFront + S3 delivery</text>
   </g>
 
   <!-- API Gateway -->
@@ -98,10 +98,10 @@
     <text x="665" y="302" class="card-label">APPLICATION LOGIC</text>
     <rect x="664" y="321" width="276" height="52" rx="12" fill="#f0fbf5"/>
     <text x="680" y="344" class="card-title" font-size="14">Session handler</text>
-    <text x="680" y="363" class="card-copy" font-size="12">Restores context and coordinates the turn</text>
+    <text x="680" y="363" class="card-copy" font-size="12">Runs each chat request</text>
     <rect x="664" y="388" width="276" height="55" rx="12" fill="#f0fbf5"/>
     <text x="680" y="411" class="card-title" font-size="14">Deterministic course tools</text>
-    <text x="680" y="430" class="card-copy" font-size="12">Filter, rank, and explain trusted course data</text>
+    <text x="680" y="430" class="card-copy" font-size="12">Searches trusted course data</text>
   </g>
 
   <!-- Bedrock -->
@@ -111,12 +111,12 @@
     <path d="M990 291h160v20h-160z" fill="url(#orange)"/>
     <rect x="1010" y="275" width="24" height="24" rx="7" fill="#e77b25"/>
     <path d="M1017 287c3-7 8-7 10 0M1019 282h6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-    <text x="1044" y="292" class="card-title" font-size="15">Amazon Bedrock</text>
+    <text x="1042" y="292" class="card-title" font-size="13" textLength="96" lengthAdjust="spacingAndGlyphs">Amazon Bedrock</text>
     <text x="1011" y="339" class="card-label">CLAUDE + GUARDRAILS</text>
-    <text x="1011" y="366" class="card-copy" font-size="12">Understands intent and</text>
-    <text x="1011" y="384" class="card-copy" font-size="12">writes the helpful reply</text>
-    <rect x="1010" y="397" width="103" height="18" rx="9" fill="#fff1df"/>
-    <text x="1021" y="410" class="chip" font-size="10">POLICY CHECKED</text>
+    <text x="1011" y="366" class="card-copy" font-size="12">Understands requests</text>
+    <text x="1011" y="384" class="card-copy" font-size="12">and writes the reply</text>
+    <rect x="1010" y="397" width="108" height="18" rx="9" fill="#fff1df"/>
+    <text x="1021" y="410" class="chip" font-size="10" textLength="86" lengthAdjust="spacingAndGlyphs">POLICY CHECKED</text>
   </g>
 
   <!-- Supporting data connectors -->
@@ -134,7 +134,7 @@
     <text x="580" y="607" class="card-title" font-size="16">DynamoDB</text>
     <text x="558" y="653" class="card-label">SESSION STATE</text>
     <text x="558" y="681" class="card-copy">Short-lived chat history</text>
-    <text x="558" y="700" class="card-copy">and student preferences</text>
+    <text x="558" y="700" class="card-copy">and preferences</text>
   </g>
 
   <!-- Course catalog -->
@@ -145,9 +145,9 @@
     <path d="M839 584h17v20h-17zM842 588h11M842 594h11M842 600h11" fill="none" stroke="#d83b73" stroke-width="2" stroke-linecap="round"/>
     <text x="870" y="607" class="card-title" font-size="16">Course catalog</text>
     <text x="843" y="653" class="card-label">STRUCTURED COURSE DATA</text>
-    <text x="843" y="681" class="card-copy">Deterministic filters and rankings</text>
+    <text x="843" y="681" class="card-copy">Trusted course data</text>
     <rect x="843" y="693" width="208" height="18" rx="9" fill="#fff0f4"/>
-    <text x="853" y="706" class="chip" font-size="10">SQLite locally · Aurora in production</text>
+    <text x="853" y="706" class="chip" font-size="10" textLength="186" lengthAdjust="spacingAndGlyphs">SQLite locally · Aurora in production</text>
   </g>
 
   <rect x="55" y="765" width="1095" height="55" rx="16" fill="#fff" stroke="#dbe5f2"/>
@@ -155,5 +155,5 @@
   <circle cx="225" cy="792" r="8" fill="#159a63"/><text x="241" y="797" class="card-copy" font-size="12">Application logic</text>
   <circle cx="420" cy="792" r="8" fill="#e77b25"/><text x="436" y="797" class="card-copy" font-size="12">AI and guardrails</text>
   <circle cx="585" cy="792" r="8" fill="#d83b73"/><text x="601" y="797" class="card-copy" font-size="12">Persistent data</text>
-  <text x="861" y="797" class="card-copy" font-size="12">Right-angle connectors show the request flow</text>
+  <text x="861" y="797" class="card-copy" font-size="12" textLength="254" lengthAdjust="spacingAndGlyphs">Right-angle connectors show the request flow</text>
 </svg>
