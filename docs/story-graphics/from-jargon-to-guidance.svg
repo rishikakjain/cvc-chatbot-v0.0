@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">From academic jargon to guided course discovery</title>
+  <desc id="desc">A before and after comparison of a jargon-heavy course search with a conversational course discovery experience.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8fbff"/><stop offset="1" stop-color="#f3f7fc"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#344b72" flood-opacity=".12"/></filter>
+    <style>.over{font:700 12px Inter,Arial,sans-serif;letter-spacing:1.7px;fill:#5c7193}.title{font:700 33px Inter,Arial,sans-serif;fill:#172b4d}.h{font:700 20px Inter,Arial,sans-serif;fill:#172b4d}.copy{font:400 15px Inter,Arial,sans-serif;fill:#405573}.small{font:700 12px Inter,Arial,sans-serif;letter-spacing:.8px;fill:#536e95}.pill{font:700 12px Inter,Arial,sans-serif;fill:#596e8e}</style>
+  </defs>
+  <rect width="1200" height="700" rx="28" fill="url(#bg)"/>
+  <text x="65" y="72" class="over">INNOVATION IN ACTION</text><text x="65" y="114" class="title">Replace filters with a conversation</text>
+  <text x="65" y="145" class="copy">The experience shifts from decoding requirements to expressing goals in plain language.</text>
+  <g filter="url(#shadow)">
+    <rect x="65" y="205" width="473" height="405" rx="24" fill="#fff" stroke="#ed91b3" stroke-width="2"/>
+    <rect x="65" y="205" width="473" height="65" rx="24" fill="#fff0f4"/><path d="M65 244h473v26H65z" fill="#fff0f4"/>
+    <circle cx="103" cy="237" r="17" fill="#d83b73"/><path d="M96 230l14 14M110 230L96 244" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+    <text x="132" y="244" class="h">Traditional search</text><text x="92" y="307" class="small">STUDENTS MUST TRANSLATE THEIR NEEDS</text>
+    <rect x="92" y="332" width="170" height="45" rx="12" fill="#fff6f8" stroke="#f4bdd1"/><text x="108" y="360" class="pill">CSU / IGETC area</text>
+    <rect x="281" y="332" width="160" height="45" rx="12" fill="#fff6f8" stroke="#f4bdd1"/><text x="297" y="360" class="pill">delivery format</text>
+    <rect x="92" y="394" width="170" height="45" rx="12" fill="#fff6f8" stroke="#f4bdd1"/><text x="108" y="422" class="pill">college + dates</text>
+    <rect x="281" y="394" width="160" height="45" rx="12" fill="#fff6f8" stroke="#f4bdd1"/><text x="297" y="422" class="pill">seat availability</text>
+    <path d="M315 463v35" fill="none" stroke="#d98dab" stroke-width="2" stroke-linecap="round"/>
+    <path d="M306 492l9 10 9-10" fill="none" stroke="#d98dab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="92" y="520" width="349" height="57" rx="14" fill="#fff6f8"/>
+    <text x="112" y="546" class="copy">Students spend time navigating the interface</text><text x="112" y="566" class="copy">instead of evaluating their best options.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="662" y="205" width="473" height="405" rx="24" fill="#fff" stroke="#75cfa6" stroke-width="2"/>
+    <rect x="662" y="205" width="473" height="65" rx="24" fill="#e8fbf2"/><path d="M662 244h473v26H662z" fill="#e8fbf2"/>
+    <circle cx="700" cy="237" r="17" fill="#159a63"/><path d="M692 238l5 5 11-12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="729" y="244" class="h">Conversational discovery</text><text x="689" y="307" class="small">STUDENTS DESCRIBE WHAT THEY NEED</text>
+    <rect x="689" y="332" width="344" height="62" rx="16" fill="#ecfaf2"/>
+    <text x="710" y="358" class="copy" font-weight="700">“I need a transferable class near home.”</text><text x="710" y="379" class="copy">Plain language in; useful context out.</text>
+    <path d="M862 409v30" fill="none" stroke="#75b99b" stroke-width="2" stroke-linecap="round"/>
+    <path d="M853 433l9 10 9-10" fill="none" stroke="#75b99b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="689" y="458" width="344" height="102" rx="16" fill="#f0fbf5" stroke="#bfe7d2"/>
+    <text x="710" y="486" class="h" font-size="16">Personalized recommendations</text>
+    <text x="710" y="514" class="copy">• seats available     • course format</text><text x="710" y="538" class="copy">• distance needs      • zero-textbook cost</text>
+  </g>
+  <path d="M560 407h78" fill="none" stroke="#667b9d" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="599" cy="407" r="25" fill="#fff" stroke="#91a6c5" stroke-width="2"/><path d="M590 407h18M601 398l9 9-9 9" fill="none" stroke="#667b9d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

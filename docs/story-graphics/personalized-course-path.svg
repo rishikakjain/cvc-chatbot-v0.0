@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">How CVC turns student needs into course recommendations</title>
+  <desc id="desc">Three connected cards show student goals, conversational clarification, and grounded course recommendations.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8fbff"/><stop offset="1" stop-color="#f2f7ff"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#344b72" flood-opacity=".12"/></filter>
+    <style>.over{font:700 12px Inter,Arial,sans-serif;letter-spacing:1.7px;fill:#5c7193}.title{font:700 33px Inter,Arial,sans-serif;fill:#172b4d}.h{font:700 20px Inter,Arial,sans-serif;fill:#172b4d}.copy{font:400 15px Inter,Arial,sans-serif;fill:#405573}.small{font:700 12px Inter,Arial,sans-serif;letter-spacing:.8px;fill:#536e95}.tag{font:700 12px Inter,Arial,sans-serif;fill:#49688f}</style>
+  </defs>
+  <rect width="1200" height="700" rx="28" fill="url(#bg)"/>
+  <text x="65" y="72" class="over">PERSONALIZED DISCOVERY</text><text x="65" y="114" class="title">A clearer path to the right course</text>
+  <text x="65" y="145" class="copy">Conversation turns a student's circumstances into practical, ranked options.</text>
+  <path d="M373 397h83M744 397h83" fill="none" stroke="#667b9d" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="415" cy="397" r="20" fill="#fff" stroke="#9aacca" stroke-width="2"/><path d="M408 397h14M416 390l7 7-7 7" fill="none" stroke="#667b9d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="786" cy="397" r="20" fill="#fff" stroke="#9aacca" stroke-width="2"/><path d="M779 397h14M787 390l7 7-7 7" fill="none" stroke="#667b9d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g filter="url(#shadow)">
+    <rect x="65" y="224" width="308" height="346" rx="24" fill="#fff" stroke="#91b5f3" stroke-width="2"/>
+    <rect x="65" y="224" width="308" height="64" rx="24" fill="#e7f0ff"/><path d="M65 262h308v26H65z" fill="#e7f0ff"/>
+    <circle cx="102" cy="256" r="17" fill="#397be0"/><circle cx="102" cy="252" r="5" fill="none" stroke="#fff" stroke-width="2"/><path d="M93 267c2-7 16-7 18 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <text x="132" y="263" class="h">Student goals</text><text x="92" y="326" class="small">WHAT MATTERS TO THIS STUDENT?</text>
+    <rect x="92" y="351" width="124" height="34" rx="17" fill="#edf4ff"/><text x="108" y="373" class="tag">near home</text>
+    <rect x="228" y="351" width="107" height="34" rx="17" fill="#edf4ff"/><text x="244" y="373" class="tag">async</text>
+    <rect x="92" y="398" width="157" height="34" rx="17" fill="#edf4ff"/><text x="108" y="420" class="tag">zero textbook cost</text>
+    <rect x="92" y="445" width="142" height="34" rx="17" fill="#edf4ff"/><text x="108" y="467" class="tag">shorter term</text>
+    <text x="92" y="525" class="copy">A student begins with goals,</text><text x="92" y="546" class="copy">not a list of filters.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="436" y="224" width="308" height="346" rx="24" fill="#fff" stroke="#75cfa6" stroke-width="2"/>
+    <rect x="436" y="224" width="308" height="64" rx="24" fill="#e8fbf2"/><path d="M436 262h308v26H436z" fill="#e8fbf2"/>
+    <circle cx="473" cy="256" r="17" fill="#159a63"/><path d="M465 251h16v10h-9l-5 5v-5h-2z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+    <text x="503" y="263" class="h">Conversation</text><text x="463" y="326" class="small">THE CHATBOT CLARIFIES CONTEXT</text>
+    <rect x="463" y="351" width="246" height="57" rx="15" fill="#f0fbf5"/><text x="480" y="375" class="copy">“Do you prefer a short course</text><text x="480" y="396" class="copy">or a full semester?”</text>
+    <rect x="493" y="427" width="216" height="57" rx="15" fill="#e8f8ef"/><text x="510" y="451" class="copy">“Shorter, if possible.”</text><text x="510" y="472" class="copy">Preference saved for this session.</text>
+    <text x="463" y="525" class="copy">The conversation makes</text><text x="463" y="546" class="copy">constraints actionable.</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="807" y="224" width="328" height="346" rx="24" fill="#fff" stroke="#f0a153" stroke-width="2"/>
+    <rect x="807" y="224" width="328" height="64" rx="24" fill="#fff3e5"/><path d="M807 262h328v26H807z" fill="#fff3e5"/>
+    <circle cx="844" cy="256" r="17" fill="#e77b25"/><path d="M836 257l5 5 11-13" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="874" y="263" class="h">Recommendations</text><text x="834" y="326" class="small">GROUNDED, RANKED COURSE CARDS</text>
+    <rect x="834" y="351" width="274" height="70" rx="14" fill="#fff8ef"/><text x="850" y="377" class="h" font-size="15">1. Biology with Lab</text><text x="850" y="401" class="copy" font-size="13">Async · seats available · ZTC</text>
+    <rect x="834" y="436" width="274" height="70" rx="14" fill="#fff8ef"/><text x="850" y="462" class="h" font-size="15">2. Introduction to Sociology</text><text x="850" y="486" class="copy" font-size="13">Online · condensed format</text>
+    <text x="834" y="535" class="copy">Students can save, share,</text><text x="834" y="556" class="copy">and discuss their options.</text>
+  </g>
+</svg>
