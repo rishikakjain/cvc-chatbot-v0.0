@@ -6,6 +6,8 @@ The application is designed around an important engineering boundary: the model 
 
 ## Architecture
 
+For the complete light-mode architecture—including client state, request and tool-use loops, data modes, IAM/security boundaries, and delivery operations—see [the detailed system architecture diagram](docs/system-architecture.md).
+
 ```text
 Browser
   │
