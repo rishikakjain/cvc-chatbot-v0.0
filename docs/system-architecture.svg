@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="860" viewBox="0 0 1260 860" role="img" aria-labelledby="title description">
   <title id="title">CVC Chatbot system architecture</title>
   <desc id="description">A simplified architecture diagram showing a student using the CVC web application, API Gateway, Lambda, Amazon Bedrock, DynamoDB, and the course catalog.</desc>
   <defs>
@@ -36,8 +36,8 @@
     </style>
   </defs>
 
-  <rect width="1200" height="860" rx="28" fill="url(#canvas)"/>
-  <rect x="28" y="24" width="1144" height="112" rx="22" fill="#fff" filter="url(#shadow)"/>
+  <rect width="1260" height="860" rx="28" fill="url(#canvas)"/>
+  <rect x="28" y="24" width="1204" height="112" rx="22" fill="#fff" filter="url(#shadow)"/>
   <text x="72" y="70" class="eyebrow">CVC CHATBOT · SYSTEM OVERVIEW</text>
   <text x="72" y="108" class="heading" font-size="31" font-weight="700">From a student question to grounded course results</text>
   <rect x="983" y="57" width="137" height="42" rx="21" fill="#e9f9f0"/>
@@ -106,9 +106,9 @@
 
   <!-- Bedrock -->
   <g filter="url(#shadow)">
-    <rect x="995" y="264" width="185" height="162" rx="20" fill="#fff" stroke="#f0a153" stroke-width="2"/>
-    <rect x="995" y="264" width="185" height="47" rx="20" fill="url(#orange)"/>
-    <path d="M995 291h185v20h-185z" fill="url(#orange)"/>
+    <rect x="995" y="264" width="225" height="162" rx="20" fill="#fff" stroke="#f0a153" stroke-width="2"/>
+    <rect x="995" y="264" width="225" height="47" rx="20" fill="url(#orange)"/>
+    <path d="M995 291h225v20h-225z" fill="url(#orange)"/>
     <rect x="1015" y="275" width="24" height="24" rx="7" fill="#e77b25"/>
     <path d="M1022 287c3-7 8-7 10 0M1024 282h6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
     <text x="1049" y="292" class="card-title" font-size="15">Amazon Bedrock</text>
@@ -150,7 +150,7 @@
     <text x="853" y="706" class="chip" font-size="10">SQLite locally · Aurora in production</text>
   </g>
 
-  <rect x="55" y="765" width="1095" height="55" rx="16" fill="#fff" stroke="#dbe5f2"/>
+  <rect x="55" y="765" width="1155" height="55" rx="16" fill="#fff" stroke="#dbe5f2"/>
   <circle cx="83" cy="792" r="8" fill="#397be0"/><text x="99" y="797" class="card-copy" font-size="12">Experience</text>
   <circle cx="225" cy="792" r="8" fill="#159a63"/><text x="241" y="797" class="card-copy" font-size="12">Application logic</text>
   <circle cx="420" cy="792" r="8" fill="#e77b25"/><text x="436" y="797" class="card-copy" font-size="12">AI and guardrails</text>
