@@ -40,11 +40,6 @@
   <rect x="28" y="24" width="1204" height="112" rx="22" fill="#fff" filter="url(#shadow)"/>
   <text x="72" y="70" class="eyebrow">CVC CHATBOT · SYSTEM OVERVIEW</text>
   <text x="72" y="108" class="heading" font-size="31" font-weight="700">From a student question to grounded course results</text>
-  <rect x="983" y="57" width="137" height="42" rx="21" fill="#e9f9f0"/>
-  <circle cx="1008" cy="78" r="8" fill="#1eaa6e"/>
-  <path d="M1004 78l3 3 6-7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="1024" y="82" class="chip">GROUNDED AI</text>
-
   <text x="72" y="180" class="eyebrow">PRIMARY REQUEST PATH</text>
   <path d="M135 345H168" class="connector"/>
   <path d="M413 345H435" class="connector"/>
