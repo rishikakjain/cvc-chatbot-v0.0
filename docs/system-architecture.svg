@@ -21,17 +21,14 @@
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
       <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#344b72" flood-opacity=".12"/>
     </filter>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path d="M0 0L10 5L0 10Z" fill="#667b9d"/>
-    </marker>
     <style>
       .heading { font-family: Inter, Arial, sans-serif; fill: #172b4d; }
       .eyebrow { font-family: Inter, Arial, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1.7px; fill: #5c7193; }
       .card-title { font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 700; fill: #172b4d; }
       .card-copy { font-family: Inter, Arial, sans-serif; font-size: 13px; fill: #405573; }
       .card-label { font-family: Inter, Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .7px; fill: #526b8e; }
-      .connector { fill: none; stroke: #667b9d; stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; marker-end: url(#arrow); }
-      .connector-light { fill: none; stroke: #90a2bd; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; marker-end: url(#arrow); }
+      .connector { fill: none; stroke: #667b9d; stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; }
+      .connector-light { fill: none; stroke: #90a2bd; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
       .chip { font-family: Inter, Arial, sans-serif; font-size: 11px; font-weight: 700; fill: #3e5d84; }
     </style>
   </defs>
