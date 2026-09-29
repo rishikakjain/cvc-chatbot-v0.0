@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="860" viewBox="0 0 1200 860" role="img" aria-labelledby="title description">
+  <title id="title">CVC Chatbot system architecture</title>
+  <desc id="description">A simplified architecture diagram showing a student using the CVC web application, API Gateway, Lambda, Amazon Bedrock, DynamoDB, and the course catalog.</desc>
+  <defs>
+    <linearGradient id="canvas" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fbff"/>
+      <stop offset="1" stop-color="#f4f7fb"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" x2="1">
+      <stop stop-color="#e7f0ff"/><stop offset="1" stop-color="#d9e8ff"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" x2="1">
+      <stop stop-color="#e8fbf2"/><stop offset="1" stop-color="#d8f5e7"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" x2="1">
+      <stop stop-color="#fff3e5"/><stop offset="1" stop-color="#ffe7cb"/>
+    </linearGradient>
+    <linearGradient id="pink" x1="0" x2="1">
+      <stop stop-color="#fff0f4"/><stop offset="1" stop-color="#ffdfe9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="7" stdDeviation="9" flood-color="#344b72" flood-opacity=".12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#667b9d"/>
+    </marker>
+    <style>
+      .heading { font-family: Inter, Arial, sans-serif; fill: #172b4d; }
+      .eyebrow { font-family: Inter, Arial, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1.7px; fill: #5c7193; }
+      .card-title { font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 700; fill: #172b4d; }
+      .card-copy { font-family: Inter, Arial, sans-serif; font-size: 13px; fill: #405573; }
+      .card-label { font-family: Inter, Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .7px; fill: #526b8e; }
+      .connector { fill: none; stroke: #667b9d; stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; marker-end: url(#arrow); }
+      .connector-light { fill: none; stroke: #90a2bd; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; marker-end: url(#arrow); }
+      .chip { font-family: Inter, Arial, sans-serif; font-size: 11px; font-weight: 700; fill: #3e5d84; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="860" rx="28" fill="url(#canvas)"/>
+  <rect x="28" y="24" width="1144" height="112" rx="22" fill="#fff" filter="url(#shadow)"/>
+  <text x="72" y="70" class="eyebrow">CVC CHATBOT · SYSTEM OVERVIEW</text>
+  <text x="72" y="108" class="heading" font-size="31" font-weight="700">From a student question to grounded course results</text>
+  <rect x="983" y="57" width="137" height="42" rx="21" fill="#e9f9f0"/>
+  <circle cx="1008" cy="78" r="8" fill="#1eaa6e"/>
+  <path d="M1004 78l3 3 6-7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1024" y="82" class="chip">GROUNDED AI</text>
+
+  <text x="72" y="180" class="eyebrow">PRIMARY REQUEST PATH</text>
+  <path d="M135 345H168" class="connector"/>
+  <path d="M398 345H430" class="connector"/>
+  <path d="M600 345H642" class="connector"/>
+  <path d="M962 345H990" class="connector"/>
+
+  <!-- Student -->
+  <g filter="url(#shadow)">
+    <rect x="55" y="285" width="80" height="120" rx="28" fill="#fff" stroke="#7aa4ed" stroke-width="2"/>
+    <circle cx="95" cy="325" r="20" fill="#dceaff"/>
+    <circle cx="95" cy="319" r="7" fill="none" stroke="#3173d5" stroke-width="2.2"/>
+    <path d="M82 340c3-8 23-8 26 0" fill="none" stroke="#3173d5" stroke-width="2.2" stroke-linecap="round"/>
+    <text x="95" y="375" text-anchor="middle" class="card-title" font-size="14">Student</text>
+  </g>
+
+  <!-- Web app -->
+  <g filter="url(#shadow)">
+    <rect x="168" y="245" width="230" height="200" rx="20" fill="#fff" stroke="#91b5f3" stroke-width="2"/>
+    <rect x="168" y="245" width="230" height="53" rx="20" fill="url(#blue)"/>
+    <path d="M168 278h230v20h-230z" fill="url(#blue)"/>
+    <rect x="189" y="260" width="25" height="25" rx="8" fill="#397be0"/>
+    <path d="M196 268h11M196 273h11M196 278h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <text x="225" y="278" class="card-title" font-size="16">Web application</text>
+    <text x="190" y="327" class="card-label">REACT CHAT EXPERIENCE</text>
+    <text x="190" y="354" class="card-copy">Messages, filters, and</text>
+    <text x="190" y="374" class="card-copy">structured course cards</text>
+    <rect x="189" y="393" width="146" height="28" rx="14" fill="#edf4ff"/>
+    <text x="202" y="412" class="chip">CloudFront + S3 delivery</text>
+  </g>
+
+  <!-- API Gateway -->
+  <g filter="url(#shadow)">
+    <rect x="430" y="277" width="170" height="136" rx="20" fill="#fff" stroke="#8b93f7" stroke-width="2"/>
+    <rect x="430" y="277" width="170" height="46" rx="20" fill="#eceeff"/>
+    <path d="M430 304h170v19h-170z" fill="#eceeff"/>
+    <rect x="450" y="288" width="24" height="24" rx="7" fill="#5d63db"/>
+    <path d="M457 300h10M462 295v10" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <text x="484" y="305" class="card-title" font-size="16">API Gateway</text>
+    <text x="451" y="353" class="card-label">PUBLIC HTTPS ENDPOINT</text>
+    <text x="451" y="381" class="card-copy">POST /chat</text>
+  </g>
+
+  <!-- Lambda -->
+  <g filter="url(#shadow)">
+    <rect x="642" y="221" width="320" height="248" rx="22" fill="#fff" stroke="#75cfa6" stroke-width="2"/>
+    <rect x="642" y="221" width="320" height="54" rx="22" fill="url(#green)"/>
+    <path d="M642 252h320v23h-320z" fill="url(#green)"/>
+    <rect x="664" y="236" width="25" height="25" rx="8" fill="#159a63"/>
+    <path d="M671 243l5 5-5 5M681 253h3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="700" y="255" class="card-title" font-size="16">AWS Lambda</text>
+    <text x="665" y="302" class="card-label">APPLICATION LOGIC</text>
+    <rect x="664" y="321" width="276" height="52" rx="12" fill="#f0fbf5"/>
+    <text x="680" y="344" class="card-title" font-size="14">Session handler</text>
+    <text x="680" y="363" class="card-copy" font-size="12">Restores context and coordinates the turn</text>
+    <rect x="664" y="388" width="276" height="55" rx="12" fill="#f0fbf5"/>
+    <text x="680" y="411" class="card-title" font-size="14">Deterministic course tools</text>
+    <text x="680" y="430" class="card-copy" font-size="12">Filter, rank, and explain trusted course data</text>
+  </g>
+
+  <!-- Bedrock -->
+  <g filter="url(#shadow)">
+    <rect x="990" y="264" width="160" height="162" rx="20" fill="#fff" stroke="#f0a153" stroke-width="2"/>
+    <rect x="990" y="264" width="160" height="47" rx="20" fill="url(#orange)"/>
+    <path d="M990 291h160v20h-160z" fill="url(#orange)"/>
+    <rect x="1010" y="275" width="24" height="24" rx="7" fill="#e77b25"/>
+    <path d="M1017 287c3-7 8-7 10 0M1019 282h6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <text x="1044" y="292" class="card-title" font-size="15">Amazon Bedrock</text>
+    <text x="1011" y="339" class="card-label">CLAUDE + GUARDRAILS</text>
+    <text x="1011" y="366" class="card-copy" font-size="12">Understands intent and</text>
+    <text x="1011" y="384" class="card-copy" font-size="12">writes the helpful reply</text>
+    <rect x="1010" y="397" width="103" height="18" rx="9" fill="#fff1df"/>
+    <text x="1021" y="410" class="chip" font-size="10">POLICY CHECKED</text>
+  </g>
+
+  <!-- Supporting data connectors -->
+  <text x="72" y="542" class="eyebrow">SUPPORTING DATA</text>
+  <path d="M735 469V536H665V575" class="connector-light"/>
+  <path d="M870 469V536H950V575" class="connector-light"/>
+
+  <!-- DynamoDB -->
+  <g filter="url(#shadow)">
+    <rect x="535" y="575" width="260" height="146" rx="20" fill="#fff" stroke="#ed91b3" stroke-width="2"/>
+    <rect x="535" y="575" width="260" height="47" rx="20" fill="url(#pink)"/>
+    <path d="M535 602h260v20h-260z" fill="url(#pink)"/>
+    <ellipse cx="558" cy="590" rx="10" ry="5" fill="none" stroke="#d83b73" stroke-width="2"/>
+    <path d="M548 590v10c0 7 20 7 20 0v-10M548 600v8c0 7 20 7 20 0v-8" fill="none" stroke="#d83b73" stroke-width="2"/>
+    <text x="580" y="607" class="card-title" font-size="16">DynamoDB</text>
+    <text x="558" y="653" class="card-label">SESSION STATE</text>
+    <text x="558" y="681" class="card-copy">Short-lived chat history</text>
+    <text x="558" y="700" class="card-copy">and student preferences</text>
+  </g>
+
+  <!-- Course catalog -->
+  <g filter="url(#shadow)">
+    <rect x="820" y="575" width="300" height="146" rx="20" fill="#fff" stroke="#ed91b3" stroke-width="2"/>
+    <rect x="820" y="575" width="300" height="47" rx="20" fill="url(#pink)"/>
+    <path d="M820 602h300v20h-300z" fill="url(#pink)"/>
+    <path d="M839 584h17v20h-17zM842 588h11M842 594h11M842 600h11" fill="none" stroke="#d83b73" stroke-width="2" stroke-linecap="round"/>
+    <text x="870" y="607" class="card-title" font-size="16">Course catalog</text>
+    <text x="843" y="653" class="card-label">STRUCTURED COURSE DATA</text>
+    <text x="843" y="681" class="card-copy">Deterministic filters and rankings</text>
+    <rect x="843" y="693" width="208" height="18" rx="9" fill="#fff0f4"/>
+    <text x="853" y="706" class="chip" font-size="10">SQLite locally · Aurora in production</text>
+  </g>
+
+  <rect x="55" y="765" width="1095" height="55" rx="16" fill="#fff" stroke="#dbe5f2"/>
+  <circle cx="83" cy="792" r="8" fill="#397be0"/><text x="99" y="797" class="card-copy" font-size="12">Experience</text>
+  <circle cx="225" cy="792" r="8" fill="#159a63"/><text x="241" y="797" class="card-copy" font-size="12">Application logic</text>
+  <circle cx="420" cy="792" r="8" fill="#e77b25"/><text x="436" y="797" class="card-copy" font-size="12">AI and guardrails</text>
+  <circle cx="585" cy="792" r="8" fill="#d83b73"/><text x="601" y="797" class="card-copy" font-size="12">Persistent data</text>
+  <text x="861" y="797" class="card-copy" font-size="12">Right-angle connectors show the request flow</text>
+</svg>
