@@ -1,4 +1,4 @@
-# CVC Chatbot — Interview Architecture Guide
+# CVC Chatbot — Architecture Guide
 
 ## Service map
 
@@ -50,7 +50,7 @@ flowchart LR
 - **Local development:** SQLite and JSON course data make development and tests credential-free.
 - **Production target:** Lambda obtains database credentials from **Secrets Manager** and queries **Aurora PostgreSQL**. Aurora should be private in a VPC and reachable only by approved workloads.
 
-## Thirty-second interview answer
+## Thirty-second architecture summary
 
 “The application is a serverless React and AWS architecture. CloudFront and S3 deliver the frontend, API Gateway receives chat requests, and Lambda orchestrates the conversation. Lambda stores only short-lived session state in DynamoDB, calls Bedrock for natural-language understanding and guarded response generation, and executes deterministic course-search tools for the actual filtering and ranking. That separation means the model handles language while application code remains the authority for course data. In production, Aurora stores course data and Secrets Manager supplies credentials.”
 
